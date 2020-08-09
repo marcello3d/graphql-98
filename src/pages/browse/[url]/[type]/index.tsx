@@ -8,6 +8,7 @@ import {
 } from '../../../../lib/restructure';
 import IntrospectionWrapper from '../../../../components/IntrospectionWrapper';
 import { IntrospectionObjectType } from 'graphql';
+import { GraphqlWrapper } from '../../../../components/GraphqlWrapper';
 
 export default function TypeHome() {
   const router = useRouter();
@@ -16,9 +17,13 @@ export default function TypeHome() {
     return <div>…</div>;
   }
   return (
-    <IntrospectionWrapper
-      render={(structure) => <TypeDetails type={type} structure={structure} />}
-    />
+    <GraphqlWrapper>
+      <IntrospectionWrapper
+        render={(structure) => (
+          <TypeDetails type={type} structure={structure} />
+        )}
+      />
+    </GraphqlWrapper>
   );
 }
 
