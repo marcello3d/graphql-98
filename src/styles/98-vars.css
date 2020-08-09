@@ -1,0 +1,51 @@
+/**
+ * 98.css
+ * Copyright (c) 2020 Jordan Scales <thatjdanisso.cool>
+ * https://github.com/jdan/98.css/blob/master/LICENSE
+ */
+
+html {
+  /* Color */
+  --surface: #c0c0c0;
+  --button-highlight: #ffffff;
+  --button-face: #dfdfdf;
+  --button-shadow: #808080;
+  --window-frame: #0a0a0a;
+  --dialog-blue: #000080;
+  --dialog-blue-light: #1084d0;
+  --dialog-gray: #808080;
+  --dialog-gray-light: #b5b5b5;
+  --link-blue: #0000ff;
+
+  /* Spacing */
+  --element-spacing: 8px;
+  --grouped-button-spacing: 4px;
+  --grouped-element-spacing: 6px;
+  --radio-width: 12px;
+  --checkbox-width: 13px;
+  --radio-label-spacing: 6px;
+  --range-track-height: 4px;
+  --range-spacing: 10px;
+
+  /* Borders */
+  --border-width: 1px;
+  --border-raised-outer: inset -1px -1px var(--window-frame),
+    inset 1px 1px var(--button-highlight);
+  --border-raised-inner: inset -2px -2px var(--button-shadow),
+    inset 2px 2px var(--button-face);
+  --border-sunken-outer: inset -1px -1px var(--button-highlight),
+    inset 1px 1px var(--window-frame);
+  --border-sunken-inner: inset -2px -2px var(--button-face),
+    inset 2px 2px var(--button-shadow);
+
+  /* Window borders flip button-face and button-highlight */
+  --border-window-outer: inset -1px -1px var(--window-frame),
+    inset 1px 1px var(--button-face);
+  --border-window-inner: inset -2px -2px var(--button-shadow),
+    inset 2px 2px var(--button-highlight);
+
+  /* Field borders (checkbox, input, etc) flip window-frame and button-shadow */
+  --border-field: inset -1px -1px var(--button-highlight),
+    inset 1px 1px var(--button-shadow), inset -2px -2px var(--button-face),
+    inset 2px 2px var(--window-frame);
+}

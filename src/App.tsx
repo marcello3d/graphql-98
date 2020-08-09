@@ -1,6 +1,8 @@
 import React, { Suspense } from 'react';
 
 import './App.css';
+import '98.css';
+import './styles/98-vars.css';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { GraphQl98 } from './components/GraphQl98';
 import { globalHistory, Router } from '@reach/router';

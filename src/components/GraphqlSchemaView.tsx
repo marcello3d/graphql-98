@@ -9,7 +9,6 @@ export function GraphqlSchemaView({
 }) {
   return (
     <>
-      <h2>Queryable types</h2>
       <div>
         {queryTypes ? (
           queryTypes.map(({ type, fields }) => (

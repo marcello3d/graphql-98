@@ -1,0 +1,29 @@
+.table {
+  background: var(--button-highlight);
+  box-shadow: var(--border-field);
+  padding: 2px;
+  margin: 6px;
+  border-spacing: 0;
+}
+.row {
+}
+.column,
+.cell {
+  background: var(--button-highlight);
+}
+.columnRow {
+}
+.cell {
+  border-bottom: solid 1px var(--button-face);
+  border-right: solid 1px var(--button-face);
+  padding: 2px 2px;
+}
+.cell:focus {
+  border: solid 1px #000;
+}
+.column {
+  border: none;
+  background: var(--surface);
+  box-shadow: var(--border-raised-outer), var(--border-raised-inner);
+  padding: 3px 12px;
+}

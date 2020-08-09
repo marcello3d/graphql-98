@@ -1,6 +1,7 @@
 :root {
   --accent-color: #4a48ff;
   --app-height: 100vh;
+  tab-size: 4;
 }
 
 h1,

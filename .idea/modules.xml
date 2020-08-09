@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/graphql-browser.iml" filepath="$PROJECT_DIR$/.idea/graphql-browser.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../graphql-98/.idea/graphql-98.iml" filepath="$PROJECT_DIR$/../graphql-98/.idea/graphql-98.iml" />
     </modules>
   </component>
 </project>

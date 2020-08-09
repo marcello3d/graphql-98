@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { ChangeEvent, useCallback, useMemo } from 'react';
 import { IntrospectionSchema } from 'graphql';
 
 import { restructure } from '../lib/restructure';
@@ -17,11 +17,29 @@ export function IntrospectedGraphql({
     return structure;
   }, [schema]);
 
-  const [type, setType] = useQueryParam('type', StringParam);
+  const [selectedType, setType] = useQueryParam('type', StringParam);
 
-  if (type) {
-    return <GraphQlTypeView structure={restructured} type={type} />;
-  }
-
-  return <GraphqlSchemaView structure={restructured} />;
+  const onChangeType = useCallback(
+    (event: ChangeEvent<HTMLSelectElement>) => {
+      setType(event.currentTarget.value);
+    },
+    [setType],
+  );
+  return (
+    <>
+      <select onChange={onChangeType}>
+        <option value={''}>Overview</option>
+        {restructured.queryTypes.map(({ type }) => (
+          <option key={type} value={type} selected={type === selectedType}>
+            ⮑ {type}
+          </option>
+        ))}
+      </select>
+      {selectedType ? (
+        <GraphQlTypeView structure={restructured} type={selectedType} />
+      ) : (
+        <GraphqlSchemaView structure={restructured} />
+      )}
+    </>
+  );
 }

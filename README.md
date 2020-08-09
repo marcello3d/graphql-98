@@ -1,8 +1,6 @@
-# GraphQL Browser
+# GraphQL ‘98 Browser
 
-Using Next.js
-
-[Live demo](https://graphql-browser.vercel.app)
+[Live demo](https://graphql-98.vercel.app)
 
 ## Development
 
