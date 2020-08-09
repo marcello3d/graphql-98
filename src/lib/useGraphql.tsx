@@ -3,11 +3,10 @@ import { decodeUrlForPath } from './url-encode';
 import { useMemo } from 'react';
 import { GraphQLClient } from 'graphql-hooks';
 
-export function useGraphql():
-  | { url: string; client: GraphQLClient }
-  | undefined {
-  const router = useRouter();
-  const url = decodeUrlForPath(router.query.url);
+export function useGraphql(
+  queryUrl: string | string[],
+): { url: string; client: GraphQLClient } | undefined {
+  const url = decodeUrlForPath(queryUrl);
   return useMemo(() => {
     return (
       url && {

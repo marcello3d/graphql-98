@@ -15,7 +15,7 @@ export default function Home() {
   const loadUrl = useCallback(
     (event: FormEvent) => {
       event.preventDefault();
-      router.push(`/browse/${encodeUrlForPath(url)}`);
+      router.push(`/browse/${encodeUrlForPath(url)}/`);
     },
     [router, url],
   );

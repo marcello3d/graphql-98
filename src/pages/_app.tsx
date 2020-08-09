@@ -1,7 +1,12 @@
-import '../styles/globals.css'
+import '../styles/globals.css';
+import { GraphqlWrapper } from '../components/GraphqlWrapper';
 
 function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />
+  return (
+    <GraphqlWrapper>
+      <Component {...pageProps} />
+    </GraphqlWrapper>
+  );
 }
 
-export default MyApp
+export default MyApp;
