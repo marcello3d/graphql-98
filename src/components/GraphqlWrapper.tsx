@@ -1,35 +1,31 @@
-import Head from 'next/head';
-import { useRouter } from 'next/router';
-import { ClientContext } from 'graphql-hooks';
+import React from 'react';
+import { GraphQLClient, useQuery, ClientContext } from 'graphql-hooks';
 
-import styles from '../styles/Home.module.css';
+import { getIntrospectionQuery, IntrospectionQuery } from 'graphql';
+import { useMemo } from 'react';
+import { IntrospectedGraphql } from './IntrospectedGraphql';
 
-import { useGraphql } from '../lib/useGraphql';
+const introspectionQuery = getIntrospectionQuery();
 
-export function GraphqlWrapper({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const { query } = router;
-  const result = useGraphql(query.url);
-  if (!result) {
-    return <div>JavaScript required</div>;
+export function GraphqlWrapper({ url }: { url: string }) {
+  const client = useMemo(() => new GraphQLClient({ url }), [url]);
+
+  const { loading, error, data } = useQuery<IntrospectionQuery>(
+    introspectionQuery,
+    { client },
+  );
+
+  if (loading) {
+    return <div>Loading…</div>;
   }
-  const { client, url } = result;
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>{url.replace(/^.*?:\/\//, '')} - GraphQL Browser</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          GraphQL Browser: <code>{url}</code>
-        </h1>
-        <p className={styles.description}></p>
-        <ClientContext.Provider value={client}>
-          {children}
-        </ClientContext.Provider>
-      </main>
-    </div>
+  if (error) {
+    return <div>Error introspecting: {JSON.stringify(error)}</div>;
+  }
+
+  return (
+    <ClientContext.Provider value={client}>
+      <IntrospectedGraphql schema={data.__schema} />
+    </ClientContext.Provider>
   );
 }

@@ -1,0 +1,10 @@
+.header {
+  display: flex;
+  flex-direction: row;
+}
+.header h1 {
+  font-size: 1rem;
+}
+.urlConfig {
+  display: flex;
+}
