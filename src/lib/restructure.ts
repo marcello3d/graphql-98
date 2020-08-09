@@ -9,10 +9,13 @@ import {
 import {
   IntrospectionEnumType,
   IntrospectionInputObjectType,
+  IntrospectionInputValue,
   IntrospectionInterfaceType,
   IntrospectionScalarType,
   IntrospectionUnionType,
 } from 'graphql/utilities/getIntrospectionQuery';
+
+import { format } from 'graphql-formatter';
 
 function sortByName<T extends { name: string }>(
   array: readonly T[],
@@ -47,16 +50,16 @@ export type Introspection = {
   sortedTypes: readonly IntrospectionType[];
   sortedDirectives: readonly IntrospectionDirective[];
   typeMap: TypeMap;
-  queryType?: IntrospectionObjectType;
-  queryTypes?: QueryType[];
-  queryTypeMap?: Record<string, QueryType>;
+  queryType: IntrospectionObjectType;
+  queryTypes: QueryType[];
+  queryTypeMap: Record<string, QueryType>;
   mutationType?: IntrospectionObjectType;
   subscriptionType?: IntrospectionObjectType;
 };
 
 export function restructure({
   types,
-  queryType,
+  queryType: { name: queryTypeName },
   mutationType,
   subscriptionType,
   directives,
@@ -67,73 +70,147 @@ export function restructure({
     typeMap[type.name] = type;
   }
   const sortedDirectives = sortByName(directives);
-  function getFields(name: string) {
-    const queryType = toObject(typeMap[name]);
-    const queryTypeMap: Record<string, QueryType> = {};
-    const queryTypes: QueryType[] = [];
-    for (const field of queryType.fields) {
-      const type = getConcreteType(field.type);
-      let queryType: QueryType = queryTypeMap[type];
-      if (!queryType) {
-        queryType = {
-          type,
-          fields: [],
-          collectionFields: [],
-          idFields: [],
-        };
-        queryTypeMap[type] = queryType;
-        queryTypes.push(queryType);
-      }
-      queryType.fields.push(field);
-      if (!isList(field.type)) {
-        queryType.idFields.push(field);
-      } else if (field.args.every((arg) => arg.type.kind !== 'NON_NULL')) {
-        queryType.collectionFields.push(field);
-      }
+  const queryType = toObject(typeMap[queryTypeName]);
+  const queryTypeMap: Record<string, QueryType> = {};
+  const queryTypes: QueryType[] = [];
+  for (const field of queryType.fields) {
+    const type = getConcreteType(field.type);
+    let queryType: QueryType = queryTypeMap[type];
+    if (!queryType) {
+      queryType = {
+        type,
+        fields: [],
+        collectionFields: [],
+        idFields: [],
+      };
+      queryTypeMap[type] = queryType;
+      queryTypes.push(queryType);
     }
-    queryTypes.sort((a, b) => (a.type < b.type ? -1 : 1));
-    return { queryType, queryTypes, queryTypeMap };
+    queryType.fields.push(field);
+    if (!isList(field.type)) {
+      queryType.idFields.push(field);
+    } else if (field.args.every((arg) => arg.type.kind !== 'NON_NULL')) {
+      queryType.collectionFields.push(field);
+    }
   }
+  queryTypes.sort((a, b) => (a.type < b.type ? -1 : 1));
 
   return {
     sortedTypes,
     sortedDirectives,
     typeMap,
-    ...(queryType ? getFields(queryType.name) : {}),
+    queryType,
+    queryTypeMap,
+    queryTypes,
     mutationType: mutationType && toObject(typeMap[mutationType.name]),
     subscriptionType:
       subscriptionType && toObject(typeMap[subscriptionType.name]),
   };
 }
 
-export function queryAll(typeMap: TypeMap, queryType: QueryType) {
-  const field = queryType.collectionFields[0];
+export type SimpleArg = {
+  name: string;
+  type: SimpleType;
+  defaultValue?: any;
+};
+function getSimpleArg({ name, type, defaultValue }: IntrospectionInputValue) {
+  return {
+    name,
+    type: getSimpleType(type),
+    defaultValue,
+  };
+}
+export type SimpleField = {
+  name: string;
+  args: SimpleArg[];
+  type: SimpleType;
+};
+
+export function getSimpleField(
+  typeMap: TypeMap,
+  { name, type, args }: IntrospectionField,
+): SimpleField {
+  return {
+    name,
+    args: args.map(getSimpleArg),
+    type: getSimpleType(type),
+  };
+}
+
+function queryChildField(typeMap: TypeMap, field: IntrospectionField) {}
+export function queryAll(
+  typeMap: TypeMap,
+  queryType: QueryType,
+  field: IntrospectionField,
+) {
   const collectionType = typeMap[queryType.type];
   switch (collectionType.kind) {
     case 'OBJECT':
     case 'INTERFACE':
-      return `query { ${field.name} {
+      return format(`query { 
+      ${field.name} {
        ${collectionType.fields
          .filter(({ type }) => typeMap[getConcreteType(type)].kind === 'SCALAR')
          .map(({ name }) => name)
          .join('\n')}
-      } }`;
+      }
+       }`);
     case 'UNION':
     // ??
     case 'ENUM':
     case 'SCALAR':
     case 'INPUT_OBJECT':
-      return `query { ${field.name} }`;
+      return format(`query { ${field.name} }`);
+  }
+}
+export type SimpleType = {
+  type: IntrospectionType;
+  required: boolean;
+  list: boolean;
+  listItemRequired: boolean;
+};
+
+export function getSimpleType(type: IntrospectionTypeRef): SimpleType {
+  let required = false;
+  if (type.kind === 'NON_NULL') {
+    required = true;
+    type = type.ofType;
+  }
+  let list = false;
+  if (type.kind === 'LIST') {
+    list = true;
+    type = type.ofType;
+  }
+  let listItemRequired = true;
+  if (type.kind === 'NON_NULL') {
+    listItemRequired = true;
+    type = type.ofType;
+  }
+  switch (type.kind) {
+    case 'SCALAR':
+    case 'OBJECT':
+    case 'INTERFACE':
+    case 'UNION':
+    case 'ENUM':
+    case 'INPUT_OBJECT':
+      return {
+        required,
+        list,
+        listItemRequired,
+        type: type as IntrospectionType,
+      };
+    case 'LIST':
+      throw new Error('unsupported nested list type');
   }
 }
 
-function getConcreteType(field: IntrospectionTypeRef) {
-  switch (field.kind) {
+function getConcreteType(type: IntrospectionTypeRef) {
+  switch (type.kind) {
     case 'LIST':
     case 'NON_NULL':
-      return getConcreteType(field.ofType);
+      return getConcreteType(type.ofType);
     default:
-      return field.name;
+      return type.name;
   }
 }
 

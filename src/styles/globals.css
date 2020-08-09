@@ -13,3 +13,23 @@ a {
 * {
   box-sizing: border-box;
 }
+pre {
+  -moz-tab-size: 4;
+  tab-size: 4;
+}
+
+table {
+  border: solid 1px black;
+}
+th,
+td {
+  vertical-align: top;
+  border: solid 1px #ccc;
+}
+
+td > div {
+  max-width: 50em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  height: 2em;
+}
