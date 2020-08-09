@@ -1,8 +1,8 @@
 import styles from '../styles/Home.module.css';
 import Head from 'next/head';
 import { ChangeEvent, FormEvent, useCallback, useState } from 'react';
-import { IntrospectionType } from 'graphql';
 import { useRouter } from 'next/router';
+import { encodeUrlForPath } from '../lib/url-encode';
 
 export default function Home() {
   const [url, setUrl] = useState('');
@@ -15,8 +15,7 @@ export default function Home() {
   const loadUrl = useCallback(
     (event: FormEvent) => {
       event.preventDefault();
-      const strippedUrl = url.replace(/\//g, '_-');
-      router.push(`/browse/${strippedUrl}`);
+      router.push(`/browse/${encodeUrlForPath(url)}`);
     },
     [router, url],
   );

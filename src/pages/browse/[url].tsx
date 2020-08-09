@@ -1,19 +1,25 @@
-import { useRouter } from 'next/router';
 import { GraphqlSchema } from '../../graphql-ui/schema';
+import Head from 'next/head';
+import { useGraphql } from '../../lib/useGraphql';
+import { ClientContext } from 'graphql-hooks';
 
-export default function Home() {
-  const router = useRouter();
-  const { url } = router.query;
-  if (typeof url !== 'string') {
-    return <div>Invalid url: {url}</div>;
+export default function SchemaHome() {
+  let result = useGraphql();
+  if (!result) {
+    return <div>…</div>;
   }
-  const actualUrl = url.replace(/_-/g, '/');
+  const { client, url } = result;
   return (
     <div>
+      <Head>
+        <title>{url.replace(/^.*?:\/\//, '')} - GraphQL Browser</title>
+      </Head>
       <h2>
-        Schema for: <code>{actualUrl}</code>
+        Schema for: <code>{url}</code>
       </h2>
-      <GraphqlSchema url={actualUrl} />
+      <ClientContext.Provider value={client}>
+        <GraphqlSchema />
+      </ClientContext.Provider>
     </div>
   );
 }

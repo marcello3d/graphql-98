@@ -3,12 +3,9 @@ import { GraphQLClient, useQuery } from 'graphql-hooks';
 import { getIntrospectionQuery, IntrospectionQuery } from 'graphql';
 import { formatType, restructure } from '../lib/restructure';
 
-export function GraphqlSchema({ url }: { url: string }) {
-  const client = useMemo(() => url && new GraphQLClient({ url }), [url]);
+export function GraphqlSchema() {
   const query = useMemo(() => getIntrospectionQuery({}), []);
-  const { loading, error, data } = useQuery<IntrospectionQuery>(query, {
-    client,
-  });
+  const { loading, error, data } = useQuery<IntrospectionQuery>(query, {});
 
   const restructured = useMemo(
     () => (data ? restructure(data.__schema) : undefined),
