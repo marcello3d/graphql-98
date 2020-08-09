@@ -43,7 +43,7 @@ export default function Home() {
       </main>
 
       <footer className={styles.footer}>
-        <a href="https://github.com/marcello3d/firebase-auth-nextjs">
+        <a href="https://github.com/marcello3d/graphql-browser">
           Source on Github
         </a>
       </footer>
