@@ -7,7 +7,6 @@ import { GraphqlWrapper } from './GraphqlWrapper';
 
 export function GraphQl98(props: RouteComponentProps) {
   const [url, setQueryUrl] = useQueryParam('url', StringParam);
-
   const [tempUrl, setTempUrl] = useState(url ?? '');
 
   const onChangeUrl = useCallback(

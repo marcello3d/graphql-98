@@ -46,7 +46,7 @@ type QueryType = {
 
 type TypeMap = Record<string, IntrospectionType>;
 
-export type Introspection = {
+export type Restructure = {
   sortedTypes: readonly IntrospectionType[];
   sortedDirectives: readonly IntrospectionDirective[];
   typeMap: TypeMap;
@@ -63,7 +63,7 @@ export function restructure({
   mutationType,
   subscriptionType,
   directives,
-}: IntrospectionSchema): Introspection {
+}: IntrospectionSchema): Restructure {
   const sortedTypes = sortByName(types);
   const typeMap: TypeMap = {};
   for (const type of sortedTypes) {

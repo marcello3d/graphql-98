@@ -1,38 +1,22 @@
-import { useRouter } from 'next/router';
-import { useQuery } from 'graphql-hooks';
+import React, { useMemo } from 'react';
+import { IntrospectionObjectType, IntrospectionSchema } from 'graphql';
+
 import {
   formatType,
   getSimpleType,
-  Introspection,
   queryAll,
-} from '../../../../lib/restructure';
-import IntrospectionWrapper from '../../../../components/IntrospectionWrapper';
-import { IntrospectionObjectType } from 'graphql';
-import { GraphqlWrapper } from '../../../../components/GraphqlWrapper';
+  Restructure,
+  restructure,
+} from '../lib/restructure';
+import { StringParam, useQueryParam } from 'use-query-params';
+import { useQuery } from 'graphql-hooks';
 
-export default function TypeHome() {
-  const router = useRouter();
-  const type = router.query.type;
-  if (typeof type !== 'string') {
-    return <div>…</div>;
-  }
-  return (
-    <GraphqlWrapper>
-      <IntrospectionWrapper
-        render={(structure) => (
-          <TypeDetails type={type} structure={structure} />
-        )}
-      />
-    </GraphqlWrapper>
-  );
-}
-
-function TypeDetails({
-  type,
+export function GraphQlTypeView({
   structure,
+  type,
 }: {
+  structure: Restructure;
   type: string;
-  structure: Introspection;
 }) {
   const queryType = structure.queryTypeMap?.[type];
   const field = queryType.collectionFields[0];
@@ -40,7 +24,7 @@ function TypeDetails({
   const returnType = getSimpleType(field.type);
   const { loading, error, data } = useQuery(query, {});
   console.log('query', query, field, data);
-  const rows = data?.[field.name];
+  const rows: Record<string, any>[] = data?.[field.name];
   const columns = (structure.typeMap[
     returnType.type.name
   ] as IntrospectionObjectType).fields;

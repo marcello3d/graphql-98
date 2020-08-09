@@ -2,6 +2,9 @@ import React, { useMemo } from 'react';
 import { IntrospectionSchema } from 'graphql';
 
 import { restructure } from '../lib/restructure';
+import { StringParam, useQueryParam } from 'use-query-params';
+import { GraphQlTypeView } from './GraphqlTypeView';
+import { GraphqlSchemaView } from './GraphqlSchemaView';
 
 export function IntrospectedGraphql({
   schema,
@@ -10,8 +13,15 @@ export function IntrospectedGraphql({
 }) {
   const restructured = useMemo(() => {
     const structure = restructure(schema);
-    console.log('structure', structure);
+    console.log('introspected structure', structure);
     return structure;
   }, [schema]);
-  return <div>got a schema!</div>;
+
+  const [type, setType] = useQueryParam('type', StringParam);
+
+  if (type) {
+    return <GraphQlTypeView structure={restructured} type={type} />;
+  }
+
+  return <GraphqlSchemaView structure={restructured} />;
 }
