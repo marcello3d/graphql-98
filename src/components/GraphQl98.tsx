@@ -77,7 +77,7 @@ export function GraphQl98(props: RouteComponentProps) {
         <footer className="window-body">
           Developed by <a href="https://marcello.cellosoft.com/">Marcello</a>{' '}
           for funsies. Source on{' '}
-          <a href="https://github.com/marcello3d/graphql-browser">Github</a>
+          <a href="https://github.com/marcello3d/graphql-98">Github</a>
         </footer>
       </div>
     </div>
