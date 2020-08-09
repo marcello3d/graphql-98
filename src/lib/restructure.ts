@@ -102,9 +102,12 @@ export function restructure({
     queryType,
     queryTypeMap,
     queryTypes,
-    mutationType: mutationType && toObject(typeMap[mutationType.name]),
-    subscriptionType:
-      subscriptionType && toObject(typeMap[subscriptionType.name]),
+    mutationType: mutationType
+      ? toObject(typeMap[mutationType.name])
+      : undefined,
+    subscriptionType: subscriptionType
+      ? toObject(typeMap[subscriptionType.name])
+      : undefined,
   };
 }
 
@@ -204,7 +207,7 @@ export function getSimpleType(type: IntrospectionTypeRef): SimpleType {
   }
 }
 
-function getConcreteType(type: IntrospectionTypeRef) {
+function getConcreteType(type: IntrospectionTypeRef): string {
   switch (type.kind) {
     case 'LIST':
     case 'NON_NULL':

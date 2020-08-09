@@ -1,24 +1,53 @@
 {
-  "name": "firebase-nextjs",
+  "name": "graphql-browser",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
-  },
   "dependencies": {
+    "98.css": "0.1.16",
+    "@reach/router": "1.3.4",
+    "@types/ws": "7.2.6",
+    "classnames": "2.2.6",
     "graphql": "15.3.0",
     "graphql-formatter": "1.0.3",
     "graphql-hooks": "4.5.0",
-    "next": "9.5.1",
+    "query-string": "6.13.1",
     "react": "16.13.1",
-    "react-dom": "16.13.1"
+    "react-dom": "16.13.1",
+    "react-scripts": "3.4.1",
+    "subscriptions-transport-ws": "0.9.17",
+    "typescript": "3.9.7",
+    "use-query-params": "1.1.6",
+    "ws": "7.3.1"
   },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
   "devDependencies": {
+    "@types/classnames": "2.2.10",
+    "@types/jest": "26.0.9",
     "@types/node": "14.0.27",
-    "@types/react": "16.9.44",
+    "@types/reach__router": "1.3.5",
+    "@types/react": "^16.9.44",
+    "@types/react-dom": "^16.9.8",
+    "husky": "4.2.5",
     "prettier": "2.0.5",
-    "typescript": "3.9.7"
+    "pretty-quick": "2.0.1"
   }
 }
