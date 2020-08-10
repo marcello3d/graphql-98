@@ -14,29 +14,74 @@ export function GraphQlSchemaView({
   return (
     <>
       <ul className="tree-view">
-        {queryTypes ? (
-          queryTypes.map(({ type, fields }) => (
-            <li key={type}>
-              <Link to={`/?${stringify({ url, type })}`}>🔗 {type}</Link>
-              <ul>
-                {fields.map(({ name, args, type }) => (
-                  <li key={name}>
-                    {name} (
-                    {args
-                      .map(
-                        ({ name, type, defaultValue }) =>
-                          `${name}: ${formatType(type)}`,
-                      )
-                      .join(', ')}
-                    ): {formatType(type)}
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))
-        ) : (
-          <i>None found</i>
-        )}
+        <li>
+          <span role="img" aria-label="link icon">
+            🗃
+          </span>{' '}
+          Collection types
+          <ul>
+            {queryTypes
+              .filter((t) => t.collectionFields.length > 0)
+              .map(({ type, collectionFields, fields }) => (
+                <li key={type}>
+                  <Link to={`/?${stringify({ url, type })}`}>
+                    <span role="img" aria-label="link icon">
+                      🔗
+                    </span>{' '}
+                    {type}
+                  </Link>
+                  <ul>
+                    {fields.map(({ name, args, type }) => (
+                      <li key={name}>
+                        {name} (
+                        {args
+                          .map(
+                            ({ name, type, defaultValue }) =>
+                              `${name}: ${formatType(type)}`,
+                          )
+                          .join(', ')}
+                        ): {formatType(type)}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+          </ul>
+        </li>
+        <li>
+          <span role="img" aria-label="link icon">
+            🗃
+          </span>{' '}
+          Other types <i>(currently unsupported!)</i>
+          <ul>
+            {queryTypes
+              .filter((t) => t.collectionFields.length === 0)
+              .map(({ type, collectionFields, fields }) => (
+                <li key={type}>
+                  <Link to={`/?${stringify({ url, type })}`}>
+                    <span role="img" aria-label="link icon">
+                      🔗
+                    </span>{' '}
+                    {type}
+                  </Link>
+                  <ul>
+                    {fields.map(({ name, args, type }) => (
+                      <li key={name}>
+                        {name} (
+                        {args
+                          .map(
+                            ({ name, type, defaultValue }) =>
+                              `${name}: ${formatType(type)}`,
+                          )
+                          .join(', ')}
+                        ): {formatType(type)}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+          </ul>
+        </li>
       </ul>
       <h2>Types</h2>
       <table>
