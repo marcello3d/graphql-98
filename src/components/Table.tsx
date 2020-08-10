@@ -8,20 +8,22 @@ export const Table = React.memo(function TableInner({
   getCell,
 }: {
   columns: Column[];
-  rowCount: number;
+  rowCount?: number;
   getCell: (row: number, col: number, column: Column) => React.ReactNode;
 }) {
   const rows = [];
-  for (let row = 0; row < rowCount; row++) {
-    rows.push(
-      <tr key={row} className={styles.row}>
-        {columns.map((column, col) => (
-          <td key={column.key} className={styles.cell} tabIndex={0}>
-            {getCell(row, col, column)}
-          </td>
-        ))}
-      </tr>,
-    );
+  if (rowCount) {
+    for (let row = 0; row < rowCount; row++) {
+      rows.push(
+        <tr key={row} className={styles.row}>
+          {columns.map((column, col) => (
+            <td key={column.key} className={styles.cell} tabIndex={0}>
+              {getCell(row, col, column)}
+            </td>
+          ))}
+        </tr>,
+      );
+    }
   }
   return (
     <table className={styles.table}>
@@ -34,7 +36,17 @@ export const Table = React.memo(function TableInner({
           ))}
         </tr>
       </thead>
-      <tbody>{rows}</tbody>
+      <tbody>
+        {rowCount ? (
+          rows
+        ) : (
+          <tr>
+            <td className={styles.cell} colSpan={columns.length}>
+              <i>{rowCount === 0 ? 'No results' : 'Loading…'}</i>
+            </td>
+          </tr>
+        )}
+      </tbody>
     </table>
   );
 });

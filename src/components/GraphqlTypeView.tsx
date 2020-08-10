@@ -38,19 +38,16 @@ export function GraphQlTypeView({
   );
   return (
     <>
-      <pre>{query}</pre>
-      {loading ? (
-        <div>Loading…</div>
-      ) : error ? (
+      <fieldset>
+        <legend>Query</legend>
+        <pre>{query}</pre>
+      </fieldset>
+      {error ? (
         <div>
           Error: <pre>{JSON.stringify(error, undefined, 2)}</pre>
         </div>
       ) : (
-        <Table
-          columns={columns}
-          rowCount={rows?.length ?? 0}
-          getCell={getCell}
-        />
+        <Table columns={columns} rowCount={rows?.length} getCell={getCell} />
       )}
     </>
   );

@@ -1,33 +1,14 @@
-import React, {
-  ChangeEvent,
-  FormEvent,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import React, { useEffect } from 'react';
 import { StringParam, useQueryParam } from 'use-query-params';
 import { RouteComponentProps } from '@reach/router';
 
 import styles from './GraphQl98.module.css';
-import { GraphqlWrapper } from './GraphqlWrapper';
+import { GraphQlUrlChooser } from './GraphQlUrlChooser';
 
 export function GraphQl98(props: RouteComponentProps) {
-  const [url, setQueryUrl] = useQueryParam('url', StringParam);
+  const [url] = useQueryParam('url', StringParam);
   const [type] = useQueryParam('type', StringParam);
-  const [tempUrl, setTempUrl] = useState(url ?? '');
 
-  const onChangeUrl = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) =>
-      setTempUrl(event.currentTarget.value),
-    [],
-  );
-  const loadUrl = useCallback(
-    (event: FormEvent) => {
-      event.preventDefault();
-      setQueryUrl(tempUrl, 'replace');
-    },
-    [tempUrl, setQueryUrl],
-  );
   const titleParts = [`GraphQL ‘98`];
   if (url) {
     titleParts.push(url);
@@ -42,30 +23,7 @@ export function GraphQl98(props: RouteComponentProps) {
 
   return (
     <div className={styles.main}>
-      <div className="window">
-        <div className="title-bar">
-          <div className="title-bar-text">{title} </div>
-          <div className="title-bar-controls">
-            <button aria-label="Help" disabled />
-            <button aria-label="Close" disabled />
-          </div>
-        </div>
-        <main className="window-body">
-          <form onSubmit={loadUrl} className={styles.urlConfig}>
-            <label>
-              Url:{' '}
-              <input
-                type="text"
-                placeholder="GraphQL endpoint"
-                value={tempUrl}
-                onChange={onChangeUrl}
-              />
-            </label>
-            <button>Go ➡</button>
-          </form>
-          {url && <GraphqlWrapper url={url} />}
-        </main>
-      </div>
+      <GraphQlUrlChooser />
       <div className="window">
         <div className="title-bar">
           <div className="title-bar-text">About</div>

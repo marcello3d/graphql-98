@@ -1,7 +1,7 @@
 .main {
 }
 .main > * {
-  margin: 10px;
+  margin: 10px 0;
 }
 .header {
   display: flex;
@@ -9,7 +9,4 @@
 }
 .header h1 {
   font-size: 1rem;
-}
-.urlConfig {
-  display: flex;
 }

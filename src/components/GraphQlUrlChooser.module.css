@@ -1,0 +1,24 @@
+.urlConfig {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+}
+
+.locationBox {
+  flex-grow: 1;
+  position: relative;
+  display: flex;
+}
+.urlInput {
+  margin: 0 5px;
+  flex-grow: 1;
+}
+
+.loadInfo {
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  bottom: 5px;
+  font-size: 80%;
+  opacity: 50%;
+}

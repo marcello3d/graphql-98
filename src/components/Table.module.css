@@ -4,8 +4,13 @@
   padding: 2px;
   margin: 6px;
   border-spacing: 0;
+  position: relative;
 }
 .row {
+}
+.column {
+  position: sticky;
+  top: 0; /* Don't forget this, required for the stickiness */
 }
 .column,
 .cell {
@@ -14,6 +19,7 @@
 .columnRow {
 }
 .cell {
+  border: 1px transparent;
   border-bottom: solid 1px var(--button-face);
   border-right: solid 1px var(--button-face);
   padding: 2px 2px;

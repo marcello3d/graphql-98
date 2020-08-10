@@ -11,34 +11,43 @@ export function IntrospectedGraphql({
 }: {
   schema: IntrospectionSchema;
 }) {
-  const restructured = useMemo(() => {
-    const structure = restructure(schema);
-    console.log('introspected structure', structure);
-    return structure;
-  }, [schema]);
+  const [queryType, setQueryType] = useQueryParam('type', StringParam);
 
-  const [selectedType, setType] = useQueryParam('type', StringParam);
+  const structure = useMemo(() => restructure(schema), [schema]);
 
   const onChangeType = useCallback(
     (event: ChangeEvent<HTMLSelectElement>) => {
-      setType(event.currentTarget.value);
+      setQueryType(event.currentTarget.value);
     },
-    [setType],
+    [setQueryType],
   );
+
+  const goRoot = useCallback(() => {
+    setQueryType(undefined);
+  }, [setQueryType]);
+
   return (
     <>
-      <select onChange={onChangeType}>
-        <option value={''}>Overview</option>
-        {restructured.queryTypes.map(({ type }) => (
-          <option key={type} value={type} selected={type === selectedType}>
-            ⮑ {type}
-          </option>
-        ))}
-      </select>
-      {selectedType ? (
-        <GraphQlTypeView structure={restructured} type={selectedType} />
+      <fieldset>
+        <legend>Navigation</legend>
+        <button onClick={goRoot}>Overview</button>
+        {queryType && (
+          <>
+            {' : '}
+            <select onChange={onChangeType} value={queryType ?? ''}>
+              {structure.queryTypes.map(({ type }) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
+      </fieldset>
+      {queryType ? (
+        <GraphQlTypeView structure={structure} type={queryType} />
       ) : (
-        <GraphqlSchemaView structure={restructured} />
+        <GraphqlSchemaView structure={structure} />
       )}
     </>
   );
