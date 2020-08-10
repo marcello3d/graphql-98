@@ -7,10 +7,13 @@ import {
   IntrospectionSchema,
 } from 'graphql';
 import { IntrospectedGraphql } from './IntrospectedGraphql';
+import { GraphQlError } from './GraphQlError';
 
+// Some graphql servers fail if you try to request the 'locations'
+// field on directives (we're not using directives anyway)
 const introspectionQuery = getIntrospectionQuery({
   descriptions: false,
-});
+}).replace(`locations`, '');
 
 export function GraphqlWrapper({
   url,
@@ -37,14 +40,15 @@ export function GraphqlWrapper({
       console.log(`Requesting schema for ${url}…`);
       downloadSchema();
     }
-  }, [downloadSchema, loading, storedSchema, data, setSchema, url, error]);
+  }, [downloadSchema, storedSchema, data, setSchema, url]);
 
   if (error) {
     return (
-      <>
-        <div>Error introspecting:</div>
-        <pre>{JSON.stringify(error, undefined, 2)}</pre>
-      </>
+      <GraphQlError
+        title="Error reading schema"
+        error={error}
+        note="Check your URL and try again"
+      />
     );
   }
 

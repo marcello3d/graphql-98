@@ -104,7 +104,7 @@ export function GraphQlUrlChooser() {
         </div>
         <main className="window-body">
           <form onSubmit={loadOrReloadUrl} className={styles.urlConfig}>
-            <button disabled={!url} onClick={goHome}>
+            <button type="button" disabled={!url} onClick={goHome}>
               Home
             </button>
             <div> </div>
@@ -120,7 +120,9 @@ export function GraphQlUrlChooser() {
               />
               {url && url === tempUrl && loadInfo}
             </div>
-            <button disabled={!tempUrl || tempUrl === url}>Load</button>
+            <button type="submit" disabled={!tempUrl || tempUrl === url}>
+              Load
+            </button>
           </form>
         </main>
       </div>
@@ -144,9 +146,7 @@ export function GraphQlUrlChooser() {
       ) : (
         <div className="window">
           <div className="title-bar">
-            <div className="title-bar-text">
-              Example GraphQL schemas to try out
-            </div>
+            <div className="title-bar-text">Here are some schemas to try…</div>
             <div className="title-bar-controls">
               <button aria-label="Help" disabled />
               <button aria-label="Close" disabled />

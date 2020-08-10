@@ -144,8 +144,11 @@ function queryChildField(typeMap: TypeMap, field: IntrospectionField) {}
 export function queryAll(
   typeMap: TypeMap,
   queryType: QueryType,
-  field: IntrospectionField,
+  field?: IntrospectionField,
 ) {
+  if (!field) {
+    return `query`;
+  }
   const collectionType = typeMap[queryType.type];
   switch (collectionType.kind) {
     case 'OBJECT':

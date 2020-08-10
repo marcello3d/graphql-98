@@ -27,3 +27,7 @@ ul.tree-view,
 pre {
   overflow-x: auto;
 }
+
+fieldset + fieldset {
+  margin: 10px 0;
+}
