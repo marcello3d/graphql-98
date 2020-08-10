@@ -3,10 +3,10 @@ import { IntrospectionSchema } from 'graphql';
 
 import { restructure } from '../lib/restructure';
 import { StringParam, useQueryParam } from 'use-query-params';
-import { GraphQlTypeView } from './GraphqlTypeView';
-import { GraphqlSchemaView } from './GraphqlSchemaView';
+import { GraphQlTypeView } from './GraphQlTypeView';
+import { GraphQlSchemaView } from './GraphQlSchemaView';
 
-export function IntrospectedGraphql({
+export function IntrospectedGraphQl({
   schema,
 }: {
   schema: IntrospectionSchema;
@@ -49,7 +49,7 @@ export function IntrospectedGraphql({
       {queryType ? (
         <GraphQlTypeView structure={structure} type={queryType} />
       ) : (
-        <GraphqlSchemaView structure={structure} />
+        <GraphQlSchemaView structure={structure} />
       )}
     </>
   );

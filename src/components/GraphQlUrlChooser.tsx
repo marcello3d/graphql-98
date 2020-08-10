@@ -1,5 +1,5 @@
 import styles from './GraphQlUrlChooser.module.css';
-import { GraphqlWrapper } from './GraphqlWrapper';
+import { GraphQlWrapper } from './GraphQlWrapper';
 import { SampleUrls } from './SampleUrls';
 import React, {
   ChangeEvent,
@@ -136,7 +136,7 @@ export function GraphQlUrlChooser() {
             </div>
           </div>
           <main className="window-body">
-            <GraphqlWrapper
+            <GraphQlWrapper
               url={url}
               storedSchema={storedState.schema}
               setSchema={setSchema}

@@ -6,7 +6,7 @@ import {
   IntrospectionQuery,
   IntrospectionSchema,
 } from 'graphql';
-import { IntrospectedGraphql } from './IntrospectedGraphql';
+import { IntrospectedGraphQl } from './IntrospectedGraphQl';
 import { GraphQlError } from './GraphQlError';
 
 // Some graphql servers fail if you try to request the 'locations'
@@ -15,7 +15,7 @@ const introspectionQuery = getIntrospectionQuery({
   descriptions: false,
 }).replace(`locations`, '');
 
-export function GraphqlWrapper({
+export function GraphQlWrapper({
   url,
   storedSchema,
   setSchema,
@@ -59,7 +59,7 @@ export function GraphqlWrapper({
 
   return (
     <ClientContext.Provider value={client}>
-      <IntrospectedGraphql schema={schema} />
+      <IntrospectedGraphQl schema={schema} />
     </ClientContext.Provider>
   );
 }

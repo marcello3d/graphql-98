@@ -5,7 +5,7 @@ import { Link } from '@reach/router';
 import { stringify } from 'query-string';
 import { StringParam, useQueryParam } from 'use-query-params';
 
-export function GraphqlSchemaView({
+export function GraphQlSchemaView({
   structure: { queryTypes, sortedTypes },
 }: {
   structure: Restructure;
