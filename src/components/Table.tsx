@@ -26,27 +26,29 @@ export const Table = React.memo(function TableInner({
     }
   }
   return (
-    <table className={styles.table}>
-      <thead>
-        <tr className={styles.columnRow}>
-          {columns.map(({ key, label }) => (
-            <th key={key} className={styles.column}>
-              {label}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rowCount ? (
-          rows
-        ) : (
-          <tr>
-            <td className={styles.cell} colSpan={columns.length}>
-              <i>{rowCount === 0 ? 'No results' : 'Loading…'}</i>
-            </td>
+    <div className={styles.root}>
+      <table className={styles.table}>
+        <thead>
+          <tr className={styles.columnRow}>
+            {columns.map(({ key, label }) => (
+              <th key={key} className={styles.column}>
+                {label}
+              </th>
+            ))}
           </tr>
-        )}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {rowCount ? (
+            rows
+          ) : (
+            <tr>
+              <td className={styles.cell} colSpan={columns.length}>
+                <i>{rowCount === 0 ? 'No results' : 'Loading…'}</i>
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
   );
 });

@@ -23,3 +23,7 @@ ul.tree-view,
   -webkit-font-smoothing: revert !important;
   font-size: 14px !important;
 }
+
+pre {
+  overflow-x: auto;
+}

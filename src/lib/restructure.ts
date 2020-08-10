@@ -153,7 +153,10 @@ export function queryAll(
       return format(`query { 
       ${field.name} {
        ${collectionType.fields
-         .filter(({ type }) => typeMap[getConcreteType(type)].kind === 'SCALAR')
+         .filter(({ type }) => {
+           const kind = typeMap[getConcreteType(type)].kind;
+           return kind === 'SCALAR' || kind === 'ENUM';
+         })
          .map(({ name }) => name)
          .join('\n')}
       }

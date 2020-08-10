@@ -1,0 +1,21 @@
+.true,
+.false,
+.null {
+  text-align: center;
+}
+.true {
+  font-weight: bold;
+  color: #0066ff;
+}
+.false {
+  font-style: italic;
+  color: #888;
+}
+.null {
+  font-style: italic;
+  color: #888;
+}
+.number {
+  color: blue;
+  text-align: right;
+}

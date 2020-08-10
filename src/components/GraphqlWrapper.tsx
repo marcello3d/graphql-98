@@ -28,7 +28,7 @@ export function GraphqlWrapper({
   >(introspectionQuery, { client, skipCache: true });
 
   useEffect(() => {
-    if (storedSchema || loading) {
+    if (storedSchema) {
       return;
     }
     if (data) {
@@ -37,10 +37,15 @@ export function GraphqlWrapper({
       console.log(`Requesting schema for ${url}…`);
       downloadSchema();
     }
-  }, [downloadSchema, loading, storedSchema, data, setSchema, url]);
+  }, [downloadSchema, loading, storedSchema, data, setSchema, url, error]);
 
   if (error) {
-    return <div>Error introspecting: {JSON.stringify(error)}</div>;
+    return (
+      <>
+        <div>Error introspecting:</div>
+        <pre>{JSON.stringify(error, undefined, 2)}</pre>
+      </>
+    );
   }
 
   const schema = storedSchema ?? data?.__schema;

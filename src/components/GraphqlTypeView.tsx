@@ -1,6 +1,8 @@
 import React, { useCallback } from 'react';
 import { IntrospectionObjectType } from 'graphql';
 
+import styles from './GraphQlTypeView.module.css';
+
 import {
   formatType,
   getSimpleType,
@@ -32,7 +34,20 @@ export function GraphQlTypeView({
   }));
   const getCell = useCallback(
     (row: number, col: number, { key }: { key: string }) => {
-      return <div>{rows?.[row][key]}</div>;
+      const value = rows?.[row][key];
+      if (value === true) {
+        return <div className={styles.true}>true</div>;
+      }
+      if (value === false) {
+        return <div className={styles.false}>false</div>;
+      }
+      if (value === null) {
+        return <div className={styles.null}>NULL</div>;
+      }
+      if (typeof value === 'number') {
+        return <div className={styles.number}>{value}</div>;
+      }
+      return <div>{value}</div>;
     },
     [rows],
   );

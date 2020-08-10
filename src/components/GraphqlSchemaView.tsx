@@ -1,21 +1,23 @@
 import React from 'react';
 
 import { formatType, Restructure } from '../lib/restructure';
+import { Link } from '@reach/router';
+import { stringify } from 'query-string';
+import { StringParam, useQueryParam } from 'use-query-params';
 
 export function GraphqlSchemaView({
   structure: { queryTypes, sortedTypes },
 }: {
   structure: Restructure;
 }) {
+  const [url] = useQueryParam('url', StringParam);
   return (
     <>
-      <div>
+      <ul className="tree-view">
         {queryTypes ? (
           queryTypes.map(({ type, fields }) => (
-            <div key={type}>
-              <h3>
-                <a href={`${window.location.href}&type=${type}`}>{type}</a>
-              </h3>
+            <li key={type}>
+              <Link to={`/?${stringify({ url, type })}`}>🔗 {type}</Link>
               <ul>
                 {fields.map(({ name, args, type }) => (
                   <li key={name}>
@@ -30,12 +32,12 @@ export function GraphqlSchemaView({
                   </li>
                 ))}
               </ul>
-            </div>
+            </li>
           ))
         ) : (
           <i>None found</i>
         )}
-      </div>
+      </ul>
       <h2>Types</h2>
       <table>
         <tbody>
