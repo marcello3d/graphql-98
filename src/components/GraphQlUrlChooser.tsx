@@ -10,9 +10,7 @@ import React, {
   useState,
 } from 'react';
 import { StringParam, useQueryParam } from 'use-query-params';
-import { useStorageState } from 'react-storage-hooks';
-import { IntrospectionSchema } from 'graphql';
-import { stringify } from 'query-string';
+import { useSchemaFetchedAt } from './localStorageCache';
 
 // @ts-ignore
 const timeFormatter = new Intl.DateTimeFormat('en-US', {
@@ -48,49 +46,27 @@ export function GraphQlUrlChooser() {
     [setQueryType, setQueryUrl],
   );
 
-  const [storedState, setStoredState, writeError] = useStorageState<{
-    loadDateNow?: number;
-    schema?: IntrospectionSchema;
-  }>(localStorage, `GraphQL98.schema:${stringify({ url })}`, {});
-
-  useEffect(() => {
-    if (writeError) {
-      console.error(`Storage write error:`, writeError);
-    }
-  }, [writeError]);
-
-  const loadOrReloadUrl = useCallback(
+  const loadUrl = useCallback(
     (event: FormEvent) => {
       event.preventDefault();
-      if (url === tempUrl && storedState.schema) {
-        // setStoredState({});
-      } else {
-        setQueryUrl(tempUrl, 'replace');
-      }
+      setQueryUrl(tempUrl, 'replace');
     },
-    [url, tempUrl, storedState.schema, setQueryUrl],
+    [tempUrl, setQueryUrl],
   );
 
+  const fetchedAt = useSchemaFetchedAt(url);
   const loadInfo = useMemo(() => {
-    if (!storedState.loadDateNow) {
+    if (!fetchedAt) {
       return null;
     }
-    const loadDate = new Date(storedState.loadDateNow);
-    const dateFormat = dateFormatter.format(loadDate);
+    const dateFormat = dateFormatter.format(fetchedAt);
     const sameDay = dateFormat === dateFormatter.format(Date.now());
     return (
       <div className={styles.loadInfo}>
-        Schema cached @ {sameDay ? timeFormatter.format(loadDate) : dateFormat}
+        Schema cached @ {sameDay ? timeFormatter.format(fetchedAt) : dateFormat}
       </div>
     );
-  }, [storedState.loadDateNow]);
-
-  const setSchema = useCallback(
-    (schema: IntrospectionSchema) => {
-      setStoredState({ loadDateNow: Date.now(), schema });
-    },
-    [setStoredState],
-  );
+  }, [fetchedAt]);
 
   return (
     <>
@@ -103,7 +79,7 @@ export function GraphQlUrlChooser() {
           </div>
         </div>
         <main className="window-body">
-          <form onSubmit={loadOrReloadUrl} className={styles.urlConfig}>
+          <form onSubmit={loadUrl} className={styles.urlConfig}>
             <button type="button" disabled={!url} onClick={goHome}>
               Home
             </button>
@@ -136,11 +112,7 @@ export function GraphQlUrlChooser() {
             </div>
           </div>
           <main className="window-body">
-            <GraphQlWrapper
-              url={url}
-              storedSchema={storedState.schema}
-              setSchema={setSchema}
-            />
+            <GraphQlWrapper key={url} url={url} />
           </main>
         </div>
       ) : (

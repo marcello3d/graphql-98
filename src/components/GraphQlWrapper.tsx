@@ -1,13 +1,10 @@
-import React, { useEffect, useMemo } from 'react';
-import { ClientContext, GraphQLClient, useManualQuery } from 'graphql-hooks';
+import React, { useMemo } from 'react';
+import { ClientContext, GraphQLClient, useQuery } from 'graphql-hooks';
 
-import {
-  getIntrospectionQuery,
-  IntrospectionQuery,
-  IntrospectionSchema,
-} from 'graphql';
+import { getIntrospectionQuery, IntrospectionQuery } from 'graphql';
 import { IntrospectedGraphQl } from './IntrospectedGraphQl';
 import { GraphQlError } from './GraphQlError';
+import { LocalStorageCache } from './localStorageCache';
 
 // Some graphql servers fail if you try to request the 'locations'
 // field on directives (we're not using directives anyway)
@@ -15,32 +12,20 @@ const introspectionQuery = getIntrospectionQuery({
   descriptions: false,
 }).replace(`locations`, '');
 
-export function GraphQlWrapper({
-  url,
-  storedSchema,
-  setSchema,
-}: {
-  url: string;
-  storedSchema?: IntrospectionSchema;
-  setSchema: (schema: IntrospectionSchema) => void;
-}) {
-  const client = useMemo(() => new GraphQLClient({ url }), [url]);
+export function GraphQlWrapper({ url }: { url: string }) {
+  const client = useMemo(
+    () =>
+      new GraphQLClient({
+        url,
+        cache: new LocalStorageCache(url, introspectionQuery),
+      }),
+    [url],
+  );
 
-  const [downloadSchema, { error, loading, data }] = useManualQuery<
-    IntrospectionQuery
-  >(introspectionQuery, { client, skipCache: true });
-
-  useEffect(() => {
-    if (storedSchema) {
-      return;
-    }
-    if (data) {
-      setSchema(data.__schema);
-    } else {
-      console.log(`Requesting schema for ${url}…`);
-      downloadSchema();
-    }
-  }, [downloadSchema, storedSchema, data, setSchema, url]);
+  const { error, loading, data, refetch } = useQuery<IntrospectionQuery>(
+    introspectionQuery,
+    { client },
+  );
 
   if (error) {
     return (
@@ -52,14 +37,13 @@ export function GraphQlWrapper({
     );
   }
 
-  const schema = storedSchema ?? data?.__schema;
-  if (!schema || loading) {
+  if (!data || loading) {
     return <div>Loading schema…</div>;
   }
 
   return (
     <ClientContext.Provider value={client}>
-      <IntrospectedGraphQl schema={schema} />
+      <IntrospectedGraphQl schema={data.__schema} />
     </ClientContext.Provider>
   );
 }

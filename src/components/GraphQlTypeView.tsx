@@ -28,7 +28,7 @@ export function GraphQlTypeView({
   const query = queryAll(structure.typeMap, queryType, field);
   const returnType = field && getSimpleType(field.type);
   const { loading, error, data } = useQuery(query, {});
-  console.log('query', query, field, data);
+  console.log('Raw data', data);
   const rows: Record<string, any>[] = field && data?.[field.name];
   const columns = returnType
     ? (structure.typeMap[
