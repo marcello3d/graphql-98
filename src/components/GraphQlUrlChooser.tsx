@@ -15,7 +15,10 @@ import { IntrospectionSchema } from 'graphql';
 import { stringify } from 'query-string';
 
 // @ts-ignore
-const timeFormatter = new Intl.DateTimeFormat('en-US', { timeStyle: 'short' });
+const timeFormatter = new Intl.DateTimeFormat('en-US', {
+  hour: 'numeric',
+  minute: 'numeric',
+});
 // @ts-ignore
 const dateFormatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'short' });
 
@@ -60,12 +63,12 @@ export function GraphQlUrlChooser() {
     (event: FormEvent) => {
       event.preventDefault();
       if (url === tempUrl && storedState.schema) {
-        setStoredState({});
+        // setStoredState({});
       } else {
         setQueryUrl(tempUrl, 'replace');
       }
     },
-    [url, tempUrl, storedState.schema, setStoredState, setQueryUrl],
+    [url, tempUrl, storedState.schema, setQueryUrl],
   );
 
   const loadInfo = useMemo(() => {
@@ -73,13 +76,11 @@ export function GraphQlUrlChooser() {
       return null;
     }
     const loadDate = new Date(storedState.loadDateNow);
-    const sameDay = loadDate.toDateString() === new Date().toDateString();
+    const dateFormat = dateFormatter.format(loadDate);
+    const sameDay = dateFormat === dateFormatter.format(Date.now());
     return (
       <div className={styles.loadInfo}>
-        Schema cached @{' '}
-        {sameDay
-          ? timeFormatter.format(loadDate)
-          : dateFormatter.format(loadDate)}
+        Schema cached @ {sameDay ? timeFormatter.format(loadDate) : dateFormat}
       </div>
     );
   }, [storedState.loadDateNow]);
@@ -95,7 +96,7 @@ export function GraphQlUrlChooser() {
     <>
       <div className="window">
         <div className="title-bar">
-          <div className="title-bar-text">GraphQL 98</div>
+          <div className="title-bar-text">GraphQL ‘98</div>
           <div className="title-bar-controls">
             <button aria-label="Help" disabled />
             <button aria-label="Close" disabled />
@@ -113,11 +114,9 @@ export function GraphQlUrlChooser() {
                 value={tempUrl}
                 onChange={onChangeUrl}
               />
-              {url === tempUrl && loadInfo}
+              {url && url === tempUrl && loadInfo}
             </div>
-            <button>
-              {url === tempUrl && storedState.schema ? 'Reload' : 'Load'}
-            </button>
+            <button disabled={!tempUrl || tempUrl === url}>Load</button>
             <button disabled={!url} onClick={goHome}>
               Home
             </button>

@@ -44,7 +44,7 @@ export function GraphqlWrapper({
   }
 
   const schema = storedSchema ?? data?.__schema;
-  if (!schema) {
+  if (!schema || loading) {
     return <div>Loading schema…</div>;
   }
 

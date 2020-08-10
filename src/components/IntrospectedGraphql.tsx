@@ -30,7 +30,9 @@ export function IntrospectedGraphql({
     <>
       <fieldset>
         <legend>Navigation</legend>
-        <button onClick={goRoot}>Overview</button>
+        <button onClick={goRoot} disabled={!queryType}>
+          Overview
+        </button>
         {queryType && (
           <>
             {' : '}

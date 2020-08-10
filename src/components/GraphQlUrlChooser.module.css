@@ -11,14 +11,18 @@
 }
 .urlInput {
   margin: 0 5px;
+  height: 2em !important;
   flex-grow: 1;
 }
 
 .loadInfo {
   position: absolute;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
   right: 10px;
   top: 5px;
   bottom: 5px;
   font-size: 80%;
-  opacity: 50%;
+  opacity: 0.5;
 }
