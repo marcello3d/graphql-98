@@ -1,7 +1,18 @@
 .true,
-.false,
-.null {
+.false {
   text-align: center;
+}
+.text,
+.true,
+.false,
+.null,
+.number {
+  padding: 2px 2px;
+  height: 2.2em;
+  font-size: 0.8em;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 .true {
   font-weight: bold;
@@ -18,4 +29,12 @@
 .number {
   color: blue;
   text-align: right;
+}
+
+.text {
+  max-width: 80vw;
+  white-space: pre-line;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: center;
 }

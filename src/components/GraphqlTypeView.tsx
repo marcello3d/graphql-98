@@ -47,7 +47,7 @@ export function GraphQlTypeView({
       if (typeof value === 'number') {
         return <div className={styles.number}>{value}</div>;
       }
-      return <div>{value}</div>;
+      return <div className={styles.text}>{value}</div>;
     },
     [rows],
   );

@@ -21,17 +21,13 @@
 .columnRow {
 }
 .cell {
-  border: 1px transparent;
+  padding: 1px 0 0 1px;
   border-bottom: solid 1px var(--button-face);
   border-right: solid 1px var(--button-face);
-  padding: 2px 2px;
-  height: 2em;
-  max-height: 2em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-size: 0.8em;
+  outline: none;
 }
 .cell:focus {
+  padding: 0;
   border: solid 1px #000;
 }
 .column {

@@ -104,6 +104,10 @@ export function GraphQlUrlChooser() {
         </div>
         <main className="window-body">
           <form onSubmit={loadOrReloadUrl} className={styles.urlConfig}>
+            <button disabled={!url} onClick={goHome}>
+              Home
+            </button>
+            <div> </div>
             <label htmlFor="url">Endpoint URL:</label>
             <div className={styles.locationBox}>
               <input
@@ -117,9 +121,6 @@ export function GraphQlUrlChooser() {
               {url && url === tempUrl && loadInfo}
             </div>
             <button disabled={!tempUrl || tempUrl === url}>Load</button>
-            <button disabled={!url} onClick={goHome}>
-              Home
-            </button>
           </form>
         </main>
       </div>

@@ -9,8 +9,10 @@
   position: relative;
   display: flex;
 }
+.urlConfig > * {
+  margin-right: 5px;
+}
 .urlInput {
-  margin: 0 5px;
   height: 2em !important;
   flex-grow: 1;
 }
