@@ -24,6 +24,11 @@ const sampleUrls: readonly {
     infoUrl: 'https://github.com/lennertVanSever/graphcountries',
   },
   {
+    name: 'GraphQL hub',
+    url: 'https://www.graphqlhub.com/graphql',
+    infoUrl: 'https://www.graphqlhub.com/',
+  },
+  {
     name: 'GraphQL jobs',
     url: 'https://api.graphql.jobs',
     infoUrl: 'https://graphql.jobs/docs/api',

@@ -1,7 +1,12 @@
-import { formatType, getSimpleType, Restructure } from '../lib/restructure';
-import { IntrospectionObjectType, IntrospectionType } from 'graphql';
+import {
+  formatType,
+  getSimpleTypeRef,
+  Restructure,
+  SimpleTypeRef,
+} from '../lib/restructure';
+import { IntrospectionObjectType } from 'graphql';
 
-function isNodeType({ name, kind }: IntrospectionType) {
+function isNodeType({ name, kind }: SimpleTypeRef) {
   return kind === 'OBJECT' && !/^_/.test(name);
 }
 
@@ -10,7 +15,9 @@ export function computeGraph(structure: Restructure) {
 digraph G {
   graph [rankdir = LR];
   node[shape=record];
-${(structure.sortedTypes.filter(isNodeType) as IntrospectionObjectType[])
+${(structure.sortedTypes.filter((type) =>
+  isNodeType(getSimpleTypeRef(type)),
+) as IntrospectionObjectType[])
   .map(
     (object: IntrospectionObjectType) => `
 
@@ -28,17 +35,17 @@ ${object.fields
       `
                <tr><td port="_${field.name}" border="1" align="left">${
         field.name
-      }   :   ${formatType(field.type)}</td></tr>`,
+      }   :   ${formatType(getSimpleTypeRef(field.type))}</td></tr>`,
   )
   .join('')}                    
              </table>>;
   ];
 ${object.fields
-  .filter((field) => isNodeType(getSimpleType(field.type).type))
+  .filter((field) => isNodeType(getSimpleTypeRef(field.type)))
   .map(
     (field) =>
       `
-  ${object.name}:_${field.name} -> ${getSimpleType(field.type).type.name}:root`,
+  ${object.name}:_${field.name} -> ${getSimpleTypeRef(field.type).name}:root`,
   )
   .join('')}
 

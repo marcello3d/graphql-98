@@ -1,16 +1,16 @@
 import {
+  IntrospectionField,
+  IntrospectionObjectType,
   IntrospectionSchema,
   IntrospectionType,
-  IntrospectionDirective,
-  IntrospectionObjectType,
   IntrospectionTypeRef,
-  IntrospectionField,
 } from 'graphql';
 import {
   IntrospectionEnumType,
   IntrospectionInputObjectType,
   IntrospectionInputValue,
   IntrospectionInterfaceType,
+  IntrospectionNamedTypeRef,
   IntrospectionScalarType,
   IntrospectionUnionType,
 } from 'graphql/utilities/getIntrospectionQuery';
@@ -23,18 +23,38 @@ function sortByName<T extends { name: string }>(
   return [...array].sort((a, b) => (a.name < b.name ? -1 : 1));
 }
 
-export function formatType(
-  type: IntrospectionTypeRef,
-  nonNull = false,
-): string {
-  switch (type.kind) {
-    case 'LIST':
-      return `${formatType(type.ofType)}[]`;
-    case 'NON_NULL':
-      return formatType(type.ofType, true);
-    default:
-      return nonNull ? type.name : `${type.name}?`;
+export function formatType({
+  name,
+  list,
+  listItemRequired,
+  required,
+}: SimpleTypeRef): string {
+  const parts = [name];
+  if (!listItemRequired) {
+    parts.push('?');
   }
+  if (list) {
+    parts.push('[]');
+  }
+  if (!required) {
+    parts.push('?');
+  }
+  return parts.join('');
+}
+
+export function formatArg({ name, typeRef }: SimpleArg): string {
+  const parts = [name];
+  if (!typeRef.required) {
+    parts.push('?');
+  }
+  parts.push(': ', typeRef.name);
+  if (!typeRef.listItemRequired) {
+    parts.push('?');
+  }
+  if (typeRef.list) {
+    parts.push('[]');
+  }
+  return parts.join('');
 }
 
 type QueryType = {
@@ -48,60 +68,28 @@ type TypeMap = Record<string, IntrospectionType>;
 
 export type Restructure = {
   sortedTypes: readonly IntrospectionType[];
-  sortedDirectives: readonly IntrospectionDirective[];
   typeMap: TypeMap;
-  queryType: IntrospectionObjectType;
-  queryTypes: QueryType[];
-  queryTypeMap: Record<string, QueryType>;
+  queryType: TreeNode;
   mutationType?: IntrospectionObjectType;
   subscriptionType?: IntrospectionObjectType;
 };
 
 export function restructure({
   types,
-  queryType: { name: queryTypeName },
+  queryType,
   mutationType,
   subscriptionType,
-  directives,
 }: IntrospectionSchema): Restructure {
   const sortedTypes = sortByName(types);
   const typeMap: TypeMap = {};
   for (const type of sortedTypes) {
     typeMap[type.name] = type;
   }
-  const sortedDirectives = sortByName(directives);
-  const queryType = toObject(typeMap[queryTypeName]);
-  const queryTypeMap: Record<string, QueryType> = {};
-  const queryTypes: QueryType[] = [];
-  for (const field of queryType.fields) {
-    const type = getConcreteType(field.type);
-    let queryType: QueryType = queryTypeMap[type];
-    if (!queryType) {
-      queryType = {
-        type,
-        fields: [],
-        collectionFields: [],
-        idFields: [],
-      };
-      queryTypeMap[type] = queryType;
-      queryTypes.push(queryType);
-    }
-    queryType.fields.push(field);
-    if (!isList(field.type)) {
-      queryType.idFields.push(field);
-    } else if (field.args.every((arg) => arg.type.kind !== 'NON_NULL')) {
-      queryType.collectionFields.push(field);
-    }
-  }
-  queryTypes.sort((a, b) => (a.type < b.type ? -1 : 1));
 
   return {
     sortedTypes,
-    sortedDirectives,
     typeMap,
-    queryType,
-    queryTypeMap,
-    queryTypes,
+    queryType: walkTree(queryTypeAsField(queryType, typeMap), typeMap),
     mutationType: mutationType
       ? toObject(typeMap[mutationType.name])
       : undefined,
@@ -111,36 +99,92 @@ export function restructure({
   };
 }
 
+function queryTypeAsField(
+  type: IntrospectionNamedTypeRef<IntrospectionObjectType>,
+  typeMap: TypeMap,
+): IntrospectionField {
+  return {
+    name: 'query',
+    args: [],
+    type: toObject(typeMap[type.name]),
+    isDeprecated: false,
+  };
+}
+
+export type TreeNode = { field: SimpleField } & (
+  | { type: 'function' }
+  | { type: 'collection'; fields: SimpleField[] }
+  | {
+      type: 'container';
+      children: TreeNode[];
+      childMap: Record<string, TreeNode>;
+    }
+  | { type: 'value' }
+);
+
+function walkTree(field: IntrospectionField, typeMap: TypeMap): TreeNode {
+  return walkType(getSimpleField(field, typeMap), typeMap);
+}
+function walkType(field: SimpleField, typeMap: TypeMap): TreeNode {
+  const requiresArgs = field.args.some((arg) => arg.typeRef.required);
+  if (requiresArgs) {
+    return { type: 'function', field };
+  }
+  if (field.typeRef.kind !== 'OBJECT') {
+    return { type: 'value', field };
+  }
+  const objectType = toObject(typeMap[field.typeRef.name]);
+  const fields = objectType.fields.map((field) =>
+    getSimpleField(field, typeMap),
+  );
+  if (field.typeRef.list) {
+    return { type: 'collection', field, fields };
+  }
+  const children = fields.map((subField) => walkType(subField, typeMap));
+  if (children.every(({ type }) => type === 'value')) {
+    return { type: 'value', field };
+  }
+  const childMap: Record<string, TreeNode> = {};
+  for (const child of children) {
+    childMap[child.field.name] = child;
+  }
+  return {
+    type: 'container',
+    field,
+    children,
+    childMap,
+  };
+}
+
 export type SimpleArg = {
   name: string;
-  type: SimpleType;
+  typeRef: SimpleTypeRef;
   defaultValue?: any;
 };
 function getSimpleArg({ name, type, defaultValue }: IntrospectionInputValue) {
   return {
     name,
-    type: getSimpleType(type),
+    typeRef: getSimpleTypeRef(type),
     defaultValue,
   };
 }
 export type SimpleField = {
   name: string;
   args: SimpleArg[];
-  type: SimpleType;
+  typeRef: SimpleTypeRef;
 };
 
 export function getSimpleField(
-  typeMap: TypeMap,
   { name, type, args }: IntrospectionField,
+  typeMap: TypeMap,
 ): SimpleField {
   return {
     name,
     args: args.map(getSimpleArg),
-    type: getSimpleType(type),
+    typeRef: getSimpleTypeRef(type),
   };
 }
 
-function queryChildField(typeMap: TypeMap, field: IntrospectionField) {}
 export function queryAll(
   typeMap: TypeMap,
   queryType: QueryType,
@@ -172,14 +216,13 @@ export function queryAll(
       return format(`query { ${field.name} }`);
   }
 }
-export type SimpleType = {
-  type: IntrospectionType;
+export type SimpleTypeRef = IntrospectionNamedTypeRef & {
   required: boolean;
   list: boolean;
   listItemRequired: boolean;
 };
 
-export function getSimpleType(type: IntrospectionTypeRef): SimpleType {
+export function getSimpleTypeRef(type: IntrospectionTypeRef): SimpleTypeRef {
   let required = false;
   if (type.kind === 'NON_NULL') {
     required = true;
@@ -203,10 +246,10 @@ export function getSimpleType(type: IntrospectionTypeRef): SimpleType {
     case 'ENUM':
     case 'INPUT_OBJECT':
       return {
+        ...type,
         required,
         list,
         listItemRequired,
-        type: type as IntrospectionType,
       };
     case 'LIST':
       throw new Error('unsupported nested list type');

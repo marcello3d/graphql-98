@@ -22,7 +22,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'short' });
 
 export function GraphQlUrlChooser() {
   const [url, setQueryUrl] = useQueryParam('url', StringParam);
-  const [, setQueryType] = useQueryParam('type', StringParam);
+  const [, setQueryPath] = useQueryParam('path', StringParam);
   const [tempUrl, setTempUrl] = useState(url ?? 'https://');
   useEffect(() => {
     if (url) {
@@ -41,9 +41,9 @@ export function GraphQlUrlChooser() {
       event.preventDefault();
       setTempUrl('');
       setQueryUrl(undefined);
-      setQueryType(undefined);
+      setQueryPath(undefined);
     },
-    [setQueryType, setQueryUrl],
+    [setQueryPath, setQueryUrl],
   );
 
   const loadUrl = useCallback(

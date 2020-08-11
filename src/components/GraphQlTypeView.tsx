@@ -1,43 +1,69 @@
 import React, { useCallback } from 'react';
-import { IntrospectionObjectType } from 'graphql';
 
 import styles from './GraphQlTypeView.module.css';
 
-import {
-  formatType,
-  getSimpleType,
-  queryAll,
-  Restructure,
-} from '../lib/restructure';
+import { formatType, Restructure } from '../lib/restructure';
 import { useQuery } from 'graphql-hooks';
 import { Table } from './Table';
 import { GraphQlError } from './GraphQlError';
+import { format } from 'graphql-formatter';
 
 export function GraphQlTypeView({
+  url,
   structure,
-  type,
+  path,
 }: {
+  url: string;
   structure: Restructure;
-  type: string;
+  path: string[];
 }) {
-  const queryType = structure.queryTypeMap[type];
-  const field =
-    queryType.collectionFields.length > 0
-      ? queryType.collectionFields[0]
-      : undefined;
-  const query = queryAll(structure.typeMap, queryType, field);
-  const returnType = field && getSimpleType(field.type);
+  let node = structure.queryType;
+  let query = 'query {\n';
+  for (let i = 1; i < path.length; i++) {
+    const item = path[i];
+    query += `${item} {\n`;
+    if (node.type !== 'container') {
+      throw new Error(
+        `expected container "${item}" in ${path.join('.')}, got ${node.type}`,
+      );
+    }
+    console.log(`looking at ${item} in `, node);
+    node = node.childMap[item];
+    if (!node) {
+      throw new Error(`invalid path item ${item} in ${path.join('.')}`);
+    }
+  }
+
+  if (node.type === 'collection') {
+    for (const field of node.fields) {
+      if (field.typeRef.kind !== 'OBJECT') {
+        query += `${field.name}\n`;
+      }
+    }
+  }
+
+  for (let _ of path) {
+    query += '}\n';
+  }
+  query = format(query);
+
   const { loading, error, data } = useQuery(query, {});
   console.log('Raw data', data);
-  const rows: Record<string, any>[] = field && data?.[field.name];
-  const columns = returnType
-    ? (structure.typeMap[
-        returnType.type.name
-      ] as IntrospectionObjectType).fields.map(({ name, type }) => ({
-        key: name,
-        label: `${name}: ${formatType(type)}`,
-      }))
-    : [];
+  let rows: Record<string, any>[] = [];
+  if (data) {
+    let walkData = data;
+    for (let i = 1; i < path.length; i++) {
+      walkData = walkData[path[i]];
+    }
+    rows = walkData;
+  }
+  const columns =
+    node.type === 'collection'
+      ? node.fields.map(({ name, typeRef }) => ({
+          key: name,
+          label: `${name}: ${formatType(typeRef)}`,
+        }))
+      : [];
   const getCell = useCallback(
     (row: number, col: number, { key }: { key: string }) => {
       const value = rows?.[row][key];
@@ -70,4 +96,5 @@ export function GraphQlTypeView({
       )}
     </>
   );
+  return <div>ok</div>;
 }

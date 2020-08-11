@@ -7,14 +7,14 @@ import { GraphQlUrlChooser } from './GraphQlUrlChooser';
 
 export function GraphQl98(props: RouteComponentProps) {
   const [url] = useQueryParam('url', StringParam);
-  const [type] = useQueryParam('type', StringParam);
+  const [path] = useQueryParam('path', StringParam);
 
   const titleParts = [`GraphQL ‘98`];
   if (url) {
     titleParts.push(url);
   }
-  if (type) {
-    titleParts.push(type);
+  if (path) {
+    titleParts.push(path);
   }
   const title = titleParts.join(' - ');
   useEffect(() => {

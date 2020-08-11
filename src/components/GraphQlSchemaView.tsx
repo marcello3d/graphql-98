@@ -1,89 +1,84 @@
 import React from 'react';
 
-import { formatType, Restructure } from '../lib/restructure';
+import {
+  formatArg,
+  formatType,
+  Restructure,
+  TreeNode,
+} from '../lib/restructure';
 import { Link } from '@reach/router';
 import { stringify } from 'query-string';
-import { StringParam, useQueryParam } from 'use-query-params';
 import { GraphvizGraph } from './GraphvizGraph';
 import { computeGraph } from './schemaToGraphviz';
 
-export function GraphQlSchemaView({ structure }: { structure: Restructure }) {
-  const [url] = useQueryParam('url', StringParam);
-  const { queryTypes } = structure;
+export function GraphQlSchemaView({
+  url,
+  structure,
+}: {
+  url: string;
+  structure: Restructure;
+}) {
+  const { queryType } = structure;
   const graph = computeGraph(structure);
   return (
     <>
       <ul className="tree-view">
         <li>
-          <span role="img" aria-label="link icon">
-            🗃
-          </span>{' '}
-          Collection types
+          <EmojiIcon emoji="🗃" label="root" /> {url}
           <ul>
-            {queryTypes
-              .filter((t) => t.collectionFields.length > 0)
-              .map(({ type, collectionFields, fields }) => (
-                <li key={type}>
-                  <Link to={`/?${stringify({ url, type })}`}>
-                    <span role="img" aria-label="link icon">
-                      🔗
-                    </span>{' '}
-                    {type}
-                  </Link>
-                  <ul>
-                    {fields.map(({ name, args, type }) => (
-                      <li key={name}>
-                        {name} (
-                        {args
-                          .map(
-                            ({ name, type, defaultValue }) =>
-                              `${name}: ${formatType(type)}`,
-                          )
-                          .join(', ')}
-                        ): {formatType(type)}
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-          </ul>
-        </li>
-        <li>
-          <span role="img" aria-label="link icon">
-            🗃
-          </span>{' '}
-          Other types <i>(currently unsupported!)</i>
-          <ul>
-            {queryTypes
-              .filter((t) => t.collectionFields.length === 0)
-              .map(({ type, collectionFields, fields }) => (
-                <li key={type}>
-                  <Link to={`/?${stringify({ url, type })}`}>
-                    <span role="img" aria-label="link icon">
-                      🔗
-                    </span>{' '}
-                    {type}
-                  </Link>
-                  <ul>
-                    {fields.map(({ name, args, type }) => (
-                      <li key={name}>
-                        {name} (
-                        {args
-                          .map(
-                            ({ name, type, defaultValue }) =>
-                              `${name}: ${formatType(type)}`,
-                          )
-                          .join(', ')}
-                        ): {formatType(type)}
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
+            <NodeItem node={queryType} url={url} />
           </ul>
         </li>
       </ul>
       <GraphvizGraph graph={graph} />
     </>
+  );
+}
+
+const icons = {
+  function: '⏩',
+  collection: '🛄',
+  container: '🔡',
+  value: '❇️',
+};
+
+function NodeItem({
+  url,
+  node,
+  path = [node.field.name],
+}: {
+  url: string;
+  node: TreeNode;
+  path?: string[];
+}) {
+  const { typeRef, args, name } = node.field;
+  return (
+    <li>
+      <Link to={`/?${stringify({ url, path: path.join('.') })}`}>
+        <EmojiIcon emoji={icons[node.type]} label={node.type} /> <b>{name}</b>
+      </Link>
+      {args.length > 0 && <>({args.map(formatArg).join(', ')})</>}:{' '}
+      {formatType(typeRef)}
+      {node.type === 'container' && (
+        <ul>
+          {node.children.map((child) => (
+            <NodeItem
+              key={child.field.name}
+              node={child}
+              url={url}
+              path={[...path, child.field.name]}
+            />
+          ))}
+        </ul>
+      )}
+    </li>
+  );
+}
+
+function EmojiIcon({ emoji, label }: { emoji: string; label: string }) {
+  return (
+    <span role="img" aria-label={`${label} icon`}>
+      {emoji}
+    </span>
   );
 }
