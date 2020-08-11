@@ -4,13 +4,13 @@ import { formatType, Restructure } from '../lib/restructure';
 import { Link } from '@reach/router';
 import { stringify } from 'query-string';
 import { StringParam, useQueryParam } from 'use-query-params';
+import { GraphvizGraph } from './GraphvizGraph';
+import { computeGraph } from './schemaToGraphviz';
 
-export function GraphQlSchemaView({
-  structure: { queryTypes, sortedTypes },
-}: {
-  structure: Restructure;
-}) {
+export function GraphQlSchemaView({ structure }: { structure: Restructure }) {
   const [url] = useQueryParam('url', StringParam);
+  const { queryTypes } = structure;
+  const graph = computeGraph(structure);
   return (
     <>
       <ul className="tree-view">
@@ -83,18 +83,7 @@ export function GraphQlSchemaView({
           </ul>
         </li>
       </ul>
-      <h2>Types</h2>
-      <table>
-        <tbody>
-          {sortedTypes.map((type) => (
-            <tr key={type.name}>
-              <td>{type.name}</td>
-              <td>{type.kind}</td>
-              <td>{type.description}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <GraphvizGraph graph={graph} />
     </>
   );
 }

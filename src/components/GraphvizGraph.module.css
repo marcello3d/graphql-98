@@ -1,0 +1,7 @@
+.root {
+  background: var(--button-highlight);
+  box-shadow: var(--border-field);
+  padding: 8px;
+  margin: 10px 0;
+  overflow-x: auto;
+}
