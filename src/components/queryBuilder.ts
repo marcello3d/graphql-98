@@ -8,6 +8,7 @@ export type QueryField = SimpleField & {
 export function buildQueryGraph(
   structure: Restructure,
   path: string[],
+  substructures: boolean = false,
 ): {
   node: TreeNode;
   queryGraph: QueryField;
@@ -36,7 +37,7 @@ export function buildQueryGraph(
     for (const child of node.children) {
       if (child.field.typeRef.kind !== 'OBJECT') {
         children.push(child.field);
-      } else if (child.query) {
+      } else if (substructures && child.query) {
         const subChildren = recurse(child);
         if (subChildren.length > 0) {
           children.push({
