@@ -1,7 +1,7 @@
 import { Restructure, SimpleField, TreeNode } from '../lib/restructure';
 import { format } from 'graphql-formatter';
 
-type QueryField = SimpleField & {
+export type QueryField = SimpleField & {
   children?: QueryField[];
 };
 
@@ -23,9 +23,6 @@ export function buildQueryGraph(
 
   for (let i = 1; i < path.length; i++) {
     const name = path[i];
-    if (node.type !== 'container') {
-      throw new Error(`unexpected ${node.type} in ${path.join('.')}`);
-    }
     node = node.childMap[name];
     const newChildren: QueryField[] = [];
     children.push({ ...node.field, children: newChildren });
@@ -36,21 +33,16 @@ export function buildQueryGraph(
   }
 
   function recurse(node: TreeNode, children: QueryField[] = []): QueryField[] {
-    if (node.type === 'collection' || node.type === 'container') {
-      for (const field of node.fields) {
-        const { name } = field;
-        const child =
-          node.type === 'container' ? node.childMap[name] : undefined;
-        if (field.typeRef.kind !== 'OBJECT') {
-          children.push(field);
-        } else if (child) {
-          const subChildren = recurse(child);
-          if (subChildren.length > 0) {
-            children.push({
-              ...field,
-              children: subChildren,
-            });
-          }
+    for (const child of node.children) {
+      if (child.field.typeRef.kind !== 'OBJECT') {
+        children.push(child.field);
+      } else if (child.query) {
+        const subChildren = recurse(child);
+        if (subChildren.length > 0) {
+          children.push({
+            ...child.field,
+            children: subChildren,
+          });
         }
       }
     }

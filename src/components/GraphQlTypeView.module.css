@@ -32,6 +32,9 @@
   color: blue;
   text-align: right;
 }
+.json {
+  color: #00830f;
+}
 
 .text {
   max-width: 80vw;

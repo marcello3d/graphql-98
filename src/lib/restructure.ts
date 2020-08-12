@@ -96,17 +96,17 @@ function queryTypeAsField(
   };
 }
 
-export type TreeNode = { field: SimpleField } & (
-  | { type: 'function' }
-  | { type: 'collection'; fields: SimpleField[] }
-  | {
-      type: 'container';
-      fields: SimpleField[];
-      children: TreeNode[];
-      childMap: Record<string, TreeNode>;
-    }
-  | { type: 'value'; fields?: SimpleField[] }
-);
+export type TreeNode = {
+  field: SimpleField;
+  requiredArgs: SimpleArg[];
+  optionalArgs: SimpleArg[];
+  collection: boolean;
+  show: boolean;
+  showChildren: boolean;
+  query: boolean;
+  children: TreeNode[];
+  childMap: Record<string, TreeNode>;
+};
 
 function walkTree(field: IntrospectionField, typeMap: TypeMap): TreeNode {
   return walkType(getSimpleField(field), typeMap);
@@ -116,39 +116,43 @@ function walkType(
   typeMap: TypeMap,
   seenTypes: ReadonlySet<string> = new Set(),
 ): TreeNode {
-  const requiresArgs = field.args.some((arg) => arg.typeRef.required);
-  if (requiresArgs) {
-    return { type: 'function', field };
-  }
-  if (field.typeRef.kind !== 'OBJECT') {
-    return { type: 'value', field };
+  const requiredArgs = field.args.filter((arg) => arg.typeRef.required);
+  const optionalArgs = field.args.filter((arg) => !arg.typeRef.required);
+  const collection = field.typeRef.array.length > 0;
+  const query = !collection && requiredArgs.length === 0;
+
+  if (seenTypes.has(field.typeRef.name) || field.typeRef.kind !== 'OBJECT') {
+    return {
+      field,
+      requiredArgs,
+      optionalArgs,
+      collection,
+      show: false,
+      showChildren: false,
+      query,
+      children: [],
+      childMap: {},
+    };
   }
   const objectType = toObject(typeMap[field.typeRef.name]);
   const fields = objectType.fields.map((field) => getSimpleField(field));
-  if (field.typeRef.array.length > 0) {
-    return { type: 'collection', field, fields };
-  }
-  if (seenTypes.has(field.typeRef.name)) {
-    return { type: 'value', field };
-  }
   const subSeenTypes = new Set([...seenTypes, field.typeRef.name]);
-  const children = fields
-    .map((subField) => walkType(subField, typeMap, subSeenTypes))
-    .filter(({ type }) => type !== 'value');
+  const children = fields.map((subField) =>
+    walkType(subField, typeMap, subSeenTypes),
+  );
   const childMap: Record<string, TreeNode> = {};
   for (const child of children) {
     childMap[child.field.name] = child;
   }
-  if (children.every(({ type }) => type === 'value' || type === 'container')) {
-    if (field.args.length > 0) {
-      return { type: 'function', field };
-    }
-    return { type: 'container', field, fields, children, childMap };
-  }
+  const showChildren = query && children.some(({ show }) => show);
   return {
-    type: 'container',
     field,
-    fields,
+    requiredArgs,
+    optionalArgs,
+    collection,
+    show: collection || field.args.length > 0 || showChildren,
+    showChildren,
+    query,
     children,
     childMap,
   };

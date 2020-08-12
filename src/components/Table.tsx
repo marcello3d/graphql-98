@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './Table.module.css';
 
-type Column = { key: string; label: React.ReactNode };
+export type Column = { key: string; label: React.ReactNode };
 export const Table = React.memo(function TableInner({
   columns,
   rowCount,

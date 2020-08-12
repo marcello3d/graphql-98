@@ -35,12 +35,18 @@ export function GraphQlSchemaView({
   );
 }
 
-const icons = {
-  function: '✴️',
-  collection: '🛄',
-  container: '🔡',
-  value: '❇️',
-};
+function NodeIcon({ node }: { node: TreeNode }) {
+  if (node.collection) {
+    return <EmojiIcon emoji="🛄" label="collection" />;
+  }
+  if (node.requiredArgs) {
+    return <EmojiIcon emoji="✴️" label="function" />;
+  }
+  if (node.children.length > 0) {
+    return <EmojiIcon emoji="🔡" label="container" />;
+  }
+  return <EmojiIcon emoji="❇️" label="value" />;
+}
 
 function NodeItem({
   url,
@@ -52,14 +58,17 @@ function NodeItem({
   path?: string[];
 }) {
   const { typeRef, args, name } = node.field;
+  if (!node.show) {
+    return null;
+  }
   return (
     <li>
       <Link to={`/?${stringify({ url, path: path.join('.') })}`}>
-        <EmojiIcon emoji={icons[node.type]} label={node.type} /> <b>{name}</b>
+        <NodeIcon node={node} /> <b>{name}</b>
       </Link>
       {args.length > 0 && <>({args.map(formatArg).join(', ')})</>}:{' '}
       {formatType(typeRef)}
-      {node.type === 'container' && (
+      {node.showChildren && (
         <ul>
           {node.children.map((child) => (
             <NodeItem
