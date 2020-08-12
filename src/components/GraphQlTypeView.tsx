@@ -1,46 +1,58 @@
 import React, { useCallback } from 'react';
-import { IntrospectionObjectType } from 'graphql';
 
 import styles from './GraphQlTypeView.module.css';
 
-import {
-  formatType,
-  getSimpleType,
-  queryAll,
-  Restructure,
-} from '../lib/restructure';
+import { formatType, Restructure } from '../lib/restructure';
 import { useQuery } from 'graphql-hooks';
-import { Table } from './Table';
+import { Column, Table } from './Table';
 import { GraphQlError } from './GraphQlError';
+import { buildQueryGraph, QueryField, renderGraph } from './queryBuilder';
 
 export function GraphQlTypeView({
   structure,
-  type,
+  path,
 }: {
+  url: string;
   structure: Restructure;
-  type: string;
+  path: string[];
 }) {
-  const queryType = structure.queryTypeMap[type];
-  const field =
-    queryType.collectionFields.length > 0
-      ? queryType.collectionFields[0]
-      : undefined;
-  const query = queryAll(structure.typeMap, queryType, field);
-  const returnType = field && getSimpleType(field.type);
-  const { loading, error, data } = useQuery(query, {});
+  const { queryGraph, fields } = buildQueryGraph(structure, path);
+  console.log('queryGraph', queryGraph);
+
+  const query = renderGraph(queryGraph);
+  const { error, data } = useQuery(query, {});
   console.log('Raw data', data);
-  const rows: Record<string, any>[] = field && data?.[field.name];
-  const columns = returnType
-    ? (structure.typeMap[
-        returnType.type.name
-      ] as IntrospectionObjectType).fields.map(({ name, type }) => ({
-        key: name,
-        label: `${name}: ${formatType(type)}`,
-      }))
-    : [];
+  let rows: Record<string, any>[] | undefined = undefined;
+  if (data) {
+    let walkData = data;
+    for (let i = 1; i < path.length; i++) {
+      walkData = walkData?.[path[i]];
+    }
+    rows = Array.isArray(walkData) ? walkData : [walkData];
+  }
+  const columns: Column[] = [];
+  function recurse(fields: QueryField[], path: string[] = []) {
+    for (const field of fields) {
+      const newPath = [...path, field.name];
+      if (field.children && field.children.length > 0) {
+        recurse(field.children, newPath);
+      } else {
+        const name = newPath.join('.');
+        columns.push({
+          key: name,
+          label: `${name}: ${formatType(field.typeRef)}`,
+        });
+      }
+    }
+  }
+  recurse(fields);
   const getCell = useCallback(
     (row: number, col: number, { key }: { key: string }) => {
-      const value = rows?.[row][key];
+      let value: any = rows?.[row];
+      for (const item of key.split('.')) {
+        value = value?.[item];
+      }
+
       if (value === true) {
         return <div className={styles.true}>true</div>;
       }
@@ -50,8 +62,17 @@ export function GraphQlTypeView({
       if (value === null) {
         return <div className={styles.null}>NULL</div>;
       }
+      if (value === undefined) {
+        return <div className={styles.null}>NO VALUE</div>;
+      }
+      if (value === '') {
+        return <div className={styles.empty}>EMPTY STRING</div>;
+      }
       if (typeof value === 'number') {
         return <div className={styles.number}>{value}</div>;
+      }
+      if (typeof value === 'object') {
+        return <div className={styles.json}>{JSON.stringify(value)}</div>;
       }
       return <div className={styles.text}>{value}</div>;
     },

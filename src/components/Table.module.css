@@ -20,6 +20,10 @@
 }
 .columnRow {
 }
+.loading {
+  padding: 10px;
+  font-style: italic;
+}
 .cell {
   padding: 1px 0 0 1px;
   border-bottom: solid 1px var(--button-face);

@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './Table.module.css';
 
-type Column = { key: string; label: React.ReactNode };
+export type Column = { key: string; label: React.ReactNode };
 export const Table = React.memo(function TableInner({
   columns,
   rowCount,
@@ -43,7 +43,9 @@ export const Table = React.memo(function TableInner({
           ) : (
             <tr>
               <td className={styles.cell} colSpan={columns.length}>
-                <i>{rowCount === 0 ? 'No results' : 'Loading…'}</i>
+                <div className={styles.loading}>
+                  {rowCount === 0 ? 'No results' : 'Fetching data…'}
+                </div>
               </td>
             </tr>
           )}

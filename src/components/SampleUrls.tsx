@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link } from '@reach/router';
 import { stringify } from 'query-string';
+import { EmojiIcon } from './EmojiIcon';
 
 const sampleUrls: readonly {
   name: string;
   url: string;
-  infoUrl?: string;
-  working?: boolean;
+  infoUrl: string;
 }[] = [
   {
     name: 'Artsy',
@@ -24,9 +24,19 @@ const sampleUrls: readonly {
     infoUrl: 'https://github.com/lennertVanSever/graphcountries',
   },
   {
+    name: 'GraphQL hub',
+    url: 'https://www.graphqlhub.com/graphql',
+    infoUrl: 'https://www.graphqlhub.com/',
+  },
+  {
     name: 'GraphQL jobs',
     url: 'https://api.graphql.jobs',
     infoUrl: 'https://graphql.jobs/docs/api',
+  },
+  {
+    name: 'GraphQL Pokemon',
+    url: 'https://graphql-pokemon.now.sh',
+    infoUrl: 'https://github.com/lucasbento/graphql-pokemon',
   },
   {
     name: 'HIVDB',
@@ -34,32 +44,29 @@ const sampleUrls: readonly {
     infoUrl: 'https://hivdb.stanford.edu/page/webservice/',
   },
   {
-    name: 'SpaceX Land (non-official)',
-    url: 'https://api.spacex.land/graphql/',
-    infoUrl: 'https://spacex.land/',
-  },
-  // Not working yet:
-  {
-    name: 'Ethiopian Movie Database',
-    url: 'https://etmdb.com/graphql',
-    working: false,
-  },
-  {
     name: 'melodyRepo (Go dependency manager)',
     url: 'https://api.melody.sh/graphql',
     infoUrl: 'https://melody.sh/docs/api',
-    working: false,
   },
   {
     name: 'Pokéapi (non-official)',
     url: 'https://pokeapi-graphiql.herokuapp.com/graphql',
-    working: false,
+    infoUrl: 'https://github.com/patrickshaughnessy/PokeAPI-GraphQL',
+  },
+  {
+    name: 'The Rick and Morty API (non-official)',
+    url: 'https://rickandmortyapi.com/graphql',
+    infoUrl: 'https://rickandmortyapi.com/documentation/#graphql',
+  },
+  {
+    name: 'SpaceX Land (non-official)',
+    url: 'https://api.spacex.land/graphql/',
+    infoUrl: 'https://spacex.land/',
   },
   {
     name: 'Star Wars API (non-official)',
     url: 'https://swapi-graphql.netlify.app/.netlify/functions/index',
     infoUrl: 'https://github.com/graphql/swapi-graphql',
-    working: false,
   },
 ];
 
@@ -67,18 +74,18 @@ export function SampleUrls() {
   return (
     <>
       <ul className="tree-view">
-        {sampleUrls.map(({ name, url, infoUrl, working = true }, index) => (
+        {sampleUrls.map(({ name, url, infoUrl }, index) => (
           <li key={index}>
-            {!working && <i>(currently unsupported)</i>}{' '}
             <b>
-              <Link to={`/?${stringify({ url })}`}>{name}</Link>
+              <Link to={`/?${stringify({ url })}`}>
+                <EmojiIcon emoji="📊" label="GraphQL link" />
+                {name}
+              </Link>
             </b>
-            : {url}
-            {infoUrl && (
-              <>
-                (<a href={infoUrl}>info</a>)
-              </>
-            )}
+            : {url} —{' '}
+            <a href={infoUrl}>
+              <EmojiIcon emoji="ℹ️" label="info" /> info
+            </a>
           </li>
         ))}
       </ul>

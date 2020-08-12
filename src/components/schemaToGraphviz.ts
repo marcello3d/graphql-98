@@ -1,7 +1,14 @@
-import { formatType, getSimpleType, Restructure } from '../lib/restructure';
-import { IntrospectionObjectType, IntrospectionType } from 'graphql';
+import {
+  formatArg,
+  formatType,
+  getSimpleField,
+  getSimpleTypeRef,
+  Restructure,
+  SimpleTypeRef,
+} from '../lib/restructure';
+import { IntrospectionObjectType } from 'graphql';
 
-function isNodeType({ name, kind }: IntrospectionType) {
+function isNodeType({ name, kind }: SimpleTypeRef) {
   return kind === 'OBJECT' && !/^_/.test(name);
 }
 
@@ -10,7 +17,9 @@ export function computeGraph(structure: Restructure) {
 digraph G {
   graph [rankdir = LR];
   node[shape=record];
-${(structure.sortedTypes.filter(isNodeType) as IntrospectionObjectType[])
+${(structure.sortedTypes.filter((type) =>
+  isNodeType(getSimpleTypeRef(type)),
+) as IntrospectionObjectType[])
   .map(
     (object: IntrospectionObjectType) => `
 
@@ -23,22 +32,30 @@ ${(structure.sortedTypes.filter(isNodeType) as IntrospectionObjectType[])
                  object.name
                }</font></td></tr>
 ${object.fields
-  .map(
-    (field) =>
-      `
-               <tr><td port="_${field.name}" border="1" align="left">${
-        field.name
-      }   :   ${formatType(field.type)}</td></tr>`,
-  )
+  .map((field) => {
+    const { name, typeRef, args } = getSimpleField(field);
+    const isFunc = args.length > 0;
+    const typeText = formatType(typeRef, isFunc);
+    const nameText = `${name}${
+      isFunc
+        ? `(${args.map(formatArg).join(', ')})`
+        : typeRef.required
+        ? ''
+        : '?'
+    }`;
+    // Add some extra non-breaking spaces because graphviz doesn't measure the width of <b> properly
+    return `
+               <tr><td port="_${name}" border="1" align="left">${nameText}: <b>${typeText}</b>      </td></tr>`;
+  })
   .join('')}                    
              </table>>;
   ];
 ${object.fields
-  .filter((field) => isNodeType(getSimpleType(field.type).type))
+  .filter((field) => isNodeType(getSimpleTypeRef(field.type)))
   .map(
     (field) =>
       `
-  ${object.name}:_${field.name} -> ${getSimpleType(field.type).type.name}:root`,
+  ${object.name}:_${field.name} -> ${getSimpleTypeRef(field.type).name}:root`,
   )
   .join('')}
 
