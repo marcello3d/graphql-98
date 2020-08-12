@@ -1,5 +1,7 @@
 import {
+  formatArg,
   formatType,
+  getSimpleField,
   getSimpleTypeRef,
   Restructure,
   SimpleTypeRef,
@@ -30,12 +32,20 @@ ${(structure.sortedTypes.filter((type) =>
                  object.name
                }</font></td></tr>
 ${object.fields
-  .map(({ name, type }) => {
-    const typeRef = getSimpleTypeRef(type);
-    const typeText = formatType(typeRef, false);
-    const nameText = `${name}${typeRef.required ? '' : '?'}`;
+  .map((field) => {
+    const { name, typeRef, args } = getSimpleField(field);
+    const isFunc = args.length > 0;
+    const typeText = formatType(typeRef, isFunc);
+    const nameText = `${name}${
+      isFunc
+        ? `(${args.map(formatArg).join(', ')})`
+        : typeRef.required
+        ? ''
+        : '?'
+    }`;
+    // Add some extra non-breaking spaces because graphviz doesn't measure the width of <b> properly
     return `
-               <tr><td port="_${name}" border="1" align="left">${nameText}   :   ${typeText}</td></tr>`;
+               <tr><td port="_${name}" border="1" align="left">${nameText}: <b>${typeText}</b>      </td></tr>`;
   })
   .join('')}                    
              </table>>;

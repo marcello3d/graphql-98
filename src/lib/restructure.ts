@@ -42,13 +42,6 @@ export function formatArg({ name, typeRef }: SimpleArg): string {
   return parts.join('');
 }
 
-type QueryType = {
-  type: string;
-  fields: IntrospectionField[];
-  collectionFields: IntrospectionField[];
-  idFields: IntrospectionField[];
-};
-
 type TypeMap = Record<string, IntrospectionType>;
 
 export type Restructure = {
@@ -145,12 +138,14 @@ function walkType(
     childMap[child.field.name] = child;
   }
   const showChildren = query && children.some(({ show }) => show);
+  const show =
+    collection || field.args.length > 0 || showChildren || children.length > 0;
   return {
     field,
     requiredArgs,
     optionalArgs,
     collection,
-    show: collection || field.args.length > 0 || showChildren,
+    show,
     showChildren,
     query,
     children,

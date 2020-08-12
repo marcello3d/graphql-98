@@ -10,6 +10,7 @@ import { Link } from '@reach/router';
 import { stringify } from 'query-string';
 import { GraphvizGraph } from './GraphvizGraph';
 import { computeGraph } from './schemaToGraphviz';
+import { EmojiIcon } from './EmojiIcon';
 
 export function GraphQlSchemaView({
   url,
@@ -39,7 +40,7 @@ function NodeIcon({ node }: { node: TreeNode }) {
   if (node.collection) {
     return <EmojiIcon emoji="🛄" label="collection" />;
   }
-  if (node.requiredArgs) {
+  if (node.requiredArgs.length > 0) {
     return <EmojiIcon emoji="✴️" label="function" />;
   }
   if (node.children.length > 0) {
@@ -81,13 +82,5 @@ function NodeItem({
         </ul>
       )}
     </li>
-  );
-}
-
-function EmojiIcon({ emoji, label }: { emoji: string; label: string }) {
-  return (
-    <span role="img" aria-label={`${label} icon`}>
-      {emoji}
-    </span>
   );
 }
