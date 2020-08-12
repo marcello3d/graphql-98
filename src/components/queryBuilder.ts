@@ -8,7 +8,7 @@ export type QueryField = SimpleField & {
 export function buildQueryGraph(
   structure: Restructure,
   path: string[],
-  substructures: boolean = false,
+  substructures: boolean = true,
 ): {
   node: TreeNode;
   queryGraph: QueryField;

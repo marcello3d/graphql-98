@@ -1,12 +1,38 @@
-import React, { useCallback } from 'react';
+import React, { useMemo } from 'react';
 
 import styles from './GraphQlTypeView.module.css';
 
 import { formatType, Restructure } from '../lib/restructure';
 import { useQuery } from 'graphql-hooks';
-import { Column, Table } from './Table';
+import { Table } from './Table';
 import { GraphQlError } from './GraphQlError';
 import { buildQueryGraph, QueryField, renderGraph } from './queryBuilder';
+import { Column } from 'react-table';
+
+function cellValue(value: any): React.ReactNode {
+  if (value === true) {
+    return <div className={styles.true}>true</div>;
+  }
+  if (value === false) {
+    return <div className={styles.false}>false</div>;
+  }
+  if (value === null) {
+    return <div className={styles.null}>NULL</div>;
+  }
+  if (value === undefined) {
+    return <div className={styles.null}>NO VALUE</div>;
+  }
+  if (value === '') {
+    return <div className={styles.empty}>EMPTY STRING</div>;
+  }
+  if (typeof value === 'number') {
+    return <div className={styles.number}>{value}</div>;
+  }
+  if (typeof value === 'object') {
+    return <div className={styles.json}>{JSON.stringify(value)}</div>;
+  }
+  return <div className={styles.text}>{value}</div>;
+}
 
 export function GraphQlTypeView({
   structure,
@@ -22,7 +48,7 @@ export function GraphQlTypeView({
   const query = renderGraph(queryGraph);
   const { error, data } = useQuery(query, {});
   console.log('Raw data', data);
-  let rows: Record<string, any>[] | undefined = undefined;
+  let rows: object[] | undefined = undefined;
   if (data) {
     let walkData = data;
     for (let i = 1; i < path.length; i++) {
@@ -30,54 +56,24 @@ export function GraphQlTypeView({
     }
     rows = Array.isArray(walkData) ? walkData : [walkData];
   }
-  const columns: Column[] = [];
-  function recurse(fields: QueryField[], path: string[] = []) {
-    for (const field of fields) {
-      const newPath = [...path, field.name];
-      if (field.children && field.children.length > 0) {
-        recurse(field.children, newPath);
+  function getColumns(fields: QueryField[], path: string[] = []): Column[] {
+    return fields.map(({ name, typeRef, children }) => {
+      const newPath = [...path, name];
+      const Header = `${name}: ${formatType(typeRef)}`;
+      if (children && children.length > 0) {
+        return {
+          Header,
+          columns: getColumns(children, newPath),
+        };
       } else {
-        const name = newPath.join('.');
-        columns.push({
-          key: name,
-          label: `${name}: ${formatType(field.typeRef)}`,
-        });
+        return {
+          Header,
+          accessor: newPath.join('.'),
+        };
       }
-    }
+    });
   }
-  recurse(fields);
-  const getCell = useCallback(
-    (row: number, col: number, { key }: { key: string }) => {
-      let value: any = rows?.[row];
-      for (const item of key.split('.')) {
-        value = value?.[item];
-      }
-
-      if (value === true) {
-        return <div className={styles.true}>true</div>;
-      }
-      if (value === false) {
-        return <div className={styles.false}>false</div>;
-      }
-      if (value === null) {
-        return <div className={styles.null}>NULL</div>;
-      }
-      if (value === undefined) {
-        return <div className={styles.null}>NO VALUE</div>;
-      }
-      if (value === '') {
-        return <div className={styles.empty}>EMPTY STRING</div>;
-      }
-      if (typeof value === 'number') {
-        return <div className={styles.number}>{value}</div>;
-      }
-      if (typeof value === 'object') {
-        return <div className={styles.json}>{JSON.stringify(value)}</div>;
-      }
-      return <div className={styles.text}>{value}</div>;
-    },
-    [rows],
-  );
+  const columns = useMemo(() => getColumns(fields), [fields]);
   return (
     <>
       <fieldset>
@@ -87,7 +83,7 @@ export function GraphQlTypeView({
       {error ? (
         <GraphQlError title="Query error" error={error} />
       ) : (
-        <Table columns={columns} rowCount={rows?.length} getCell={getCell} />
+        <Table columns={columns} data={rows} renderCell={cellValue} />
       )}
     </>
   );

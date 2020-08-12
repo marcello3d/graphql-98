@@ -1,53 +1,66 @@
 import React from 'react';
+import { Column, useTable } from 'react-table';
+
 import styles from './Table.module.css';
 
-export type Column = { key: string; label: React.ReactNode };
 export const Table = React.memo(function TableInner({
   columns,
-  rowCount,
-  getCell,
+  data,
+  renderCell,
 }: {
   columns: Column[];
-  rowCount?: number;
-  getCell: (row: number, col: number, column: Column) => React.ReactNode;
+  data?: object[];
+  renderCell: (value: any) => React.ReactNode;
 }) {
-  const rows = [];
-  if (rowCount) {
-    for (let row = 0; row < rowCount; row++) {
-      rows.push(
-        <tr key={row} className={styles.row}>
-          {columns.map((column, col) => (
-            <td key={column.key} className={styles.cell} tabIndex={0}>
-              {getCell(row, col, column)}
-            </td>
-          ))}
-        </tr>,
-      );
-    }
-  }
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    rows,
+    prepareRow,
+  } = useTable<object>({ columns, data: data || [] });
+
   return (
     <div className={styles.root}>
-      <table className={styles.table}>
+      <table className={styles.table} {...getTableProps()}>
         <thead>
-          <tr className={styles.columnRow}>
-            {columns.map(({ key, label }) => (
-              <th key={key} className={styles.column}>
-                {label}
-              </th>
-            ))}
-          </tr>
+          {headerGroups.map((headerGroup, i) => (
+            <tr
+              className={styles.columnRow}
+              {...headerGroup.getHeaderGroupProps()}
+            >
+              {headerGroup.headers.map((column) => (
+                <th className={styles.column} {...column.getHeaderProps()}>
+                  {column.render('Header')}
+                </th>
+              ))}
+            </tr>
+          ))}
         </thead>
-        <tbody>
-          {rowCount ? (
-            rows
-          ) : (
+        <tbody {...getTableBodyProps()}>
+          {data === undefined || rows.length === 0 ? (
             <tr>
               <td className={styles.cell} colSpan={columns.length}>
                 <div className={styles.loading}>
-                  {rowCount === 0 ? 'No results' : 'Fetching data…'}
+                  {data === undefined ? 'Fetching data…' : 'No results'}
                 </div>
               </td>
             </tr>
+          ) : (
+            rows.map((row, i) => {
+              prepareRow(row);
+              return (
+                <tr {...row.getRowProps()}>
+                  {row.cells.map((cell, i) => {
+                    return (
+                      <td className={styles.cell} {...cell.getCellProps()}>
+                        {renderCell(cell.value)}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })
           )}
         </tbody>
       </table>
