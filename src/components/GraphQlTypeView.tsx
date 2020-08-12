@@ -6,7 +6,7 @@ import { formatType, Restructure } from '../lib/restructure';
 import { useQuery } from 'graphql-hooks';
 import { Table } from './Table';
 import { GraphQlError } from './GraphQlError';
-import { format } from 'graphql-formatter';
+import { buildQueryGraph, renderGraph } from './queryBuilder';
 
 export function GraphQlTypeView({
   url,
@@ -17,56 +17,27 @@ export function GraphQlTypeView({
   structure: Restructure;
   path: string[];
 }) {
-  let node = structure.queryType;
-  let query = 'query {\n';
-  for (let i = 1; i < path.length; i++) {
-    const item = path[i];
-    query += `${item} {\n`;
-    if (node.type !== 'container') {
-      throw new Error(
-        `expected container "${item}" in ${path.join('.')}, got ${node.type}`,
-      );
-    }
-    console.log(`looking at ${item} in `, node);
-    node = node.childMap[item];
-    if (!node) {
-      throw new Error(`invalid path item ${item} in ${path.join('.')}`);
-    }
-  }
+  const { queryGraph, fields } = buildQueryGraph(structure, path);
+  const query = renderGraph(queryGraph);
+  console.log('queryGraph', queryGraph);
 
-  if (node.type === 'collection') {
-    for (const field of node.fields) {
-      if (field.typeRef.kind !== 'OBJECT') {
-        query += `${field.name}\n`;
-      }
-    }
-  }
-
-  for (let _ of path) {
-    query += '}\n';
-  }
-  query = format(query);
-
-  const { loading, error, data } = useQuery(query, {});
+  const { error, data } = useQuery(query, {});
   console.log('Raw data', data);
-  let rows: Record<string, any>[] = [];
+  let rows: Record<string, any>[] | undefined = undefined;
   if (data) {
     let walkData = data;
     for (let i = 1; i < path.length; i++) {
       walkData = walkData[path[i]];
     }
-    rows = walkData;
+    rows = Array.isArray(walkData) ? walkData : [walkData];
   }
-  const columns =
-    node.type === 'collection'
-      ? node.fields.map(({ name, typeRef }) => ({
-          key: name,
-          label: `${name}: ${formatType(typeRef)}`,
-        }))
-      : [];
+  const columns = fields.map(({ name, typeRef }) => ({
+    key: name,
+    label: `${name}: ${formatType(typeRef)}`,
+  }));
   const getCell = useCallback(
     (row: number, col: number, { key }: { key: string }) => {
-      const value = rows?.[row][key];
+      const value = rows?.[row]?.[key];
       if (value === true) {
         return <div className={styles.true}>true</div>;
       }
@@ -75,6 +46,9 @@ export function GraphQlTypeView({
       }
       if (value === null) {
         return <div className={styles.null}>NULL</div>;
+      }
+      if (value === '') {
+        return <div className={styles.empty}>EMPTY STRING</div>;
       }
       if (typeof value === 'number') {
         return <div className={styles.number}>{value}</div>;
@@ -96,5 +70,4 @@ export function GraphQlTypeView({
       )}
     </>
   );
-  return <div>ok</div>;
 }

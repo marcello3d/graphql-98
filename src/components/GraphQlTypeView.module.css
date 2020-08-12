@@ -6,6 +6,7 @@
 .true,
 .false,
 .null,
+.empty,
 .number {
   padding: 2px 2px;
   height: 2.2em;
@@ -22,7 +23,8 @@
   font-style: italic;
   color: #888;
 }
-.null {
+.null,
+.empty {
   font-style: italic;
   color: #888;
 }

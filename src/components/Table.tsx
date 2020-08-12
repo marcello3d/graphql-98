@@ -43,7 +43,9 @@ export const Table = React.memo(function TableInner({
           ) : (
             <tr>
               <td className={styles.cell} colSpan={columns.length}>
-                <i>{rowCount === 0 ? 'No results' : 'Loading…'}</i>
+                <div className={styles.loading}>
+                  {rowCount === 0 ? 'No results' : 'Fetching data…'}
+                </div>
               </td>
             </tr>
           )}

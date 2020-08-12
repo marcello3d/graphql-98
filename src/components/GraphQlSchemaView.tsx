@@ -36,7 +36,7 @@ export function GraphQlSchemaView({
 }
 
 const icons = {
-  function: '⏩',
+  function: '✴️',
   collection: '🛄',
   container: '🔡',
   value: '❇️',

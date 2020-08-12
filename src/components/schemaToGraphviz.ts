@@ -30,13 +30,13 @@ ${(structure.sortedTypes.filter((type) =>
                  object.name
                }</font></td></tr>
 ${object.fields
-  .map(
-    (field) =>
-      `
-               <tr><td port="_${field.name}" border="1" align="left">${
-        field.name
-      }   :   ${formatType(getSimpleTypeRef(field.type))}</td></tr>`,
-  )
+  .map(({ name, type }) => {
+    const typeRef = getSimpleTypeRef(type);
+    const typeText = formatType(typeRef, false);
+    const nameText = `${name}${typeRef.required ? '' : '?'}`;
+    return `
+               <tr><td port="_${name}" border="1" align="left">${nameText}   :   ${typeText}</td></tr>`;
+  })
   .join('')}                    
              </table>>;
   ];
