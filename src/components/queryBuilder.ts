@@ -66,7 +66,7 @@ export function renderGraph(graph: QueryField) {
 
   function recurse(graph: QueryField) {
     query += `${graph.name}`;
-    if (graph.children) {
+    if (graph.children && graph.children.length > 0) {
       query += `{\n`;
       for (const child of graph.children) {
         recurse(child);
