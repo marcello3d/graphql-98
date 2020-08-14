@@ -37,16 +37,23 @@ function cellValue(value: any): React.ReactNode {
 function getColumns(fields: QueryField[], path: string[] = []): Column[] {
   return fields.map(({ name, typeRef, children }) => {
     const newPath = [...path, name];
-    const Header = `${name}: ${formatType(typeRef)}`;
+    const Header = (
+      <>
+        {name}: <b>{formatType(typeRef)}</b>
+      </>
+    );
+    const fullPath = newPath.join('.');
     if (children && children.length > 0) {
       return {
+        id: fullPath,
         Header,
         columns: getColumns(children, newPath),
       };
     } else {
       return {
+        id: fullPath,
         Header,
-        accessor: newPath.join('.'),
+        accessor: fullPath,
       };
     }
   });

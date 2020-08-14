@@ -13,9 +13,10 @@
 .column {
   position: sticky;
   top: 0; /* Don't forget this, required for the stickiness */
+  font-weight: normal;
 }
 .emptyColumn {
-  background: var(--surface);
+  background: var(--button-shadow);
 }
 .column,
 .cell {
