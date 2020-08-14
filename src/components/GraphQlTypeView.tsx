@@ -35,28 +35,30 @@ function cellValue(value: any): React.ReactNode {
 }
 
 function getColumns(fields: QueryField[], path: string[] = []): Column[] {
-  return fields.map(({ name, typeRef, children }) => {
-    const newPath = [...path, name];
-    const Header = (
-      <>
-        {name}: <b>{formatType(typeRef)}</b>
-      </>
-    );
-    const fullPath = newPath.join('.');
-    if (children && children.length > 0) {
-      return {
-        id: fullPath,
-        Header,
-        columns: getColumns(children, newPath),
-      };
-    } else {
-      return {
-        id: fullPath,
-        Header,
-        accessor: fullPath,
-      };
-    }
-  });
+  return fields
+    .filter(({ disabled = false }) => !disabled)
+    .map(({ name, typeRef, children }) => {
+      const newPath = [...path, name];
+      const Header = (
+        <>
+          {name}: <b>{formatType(typeRef)}</b>
+        </>
+      );
+      const fullPath = newPath.join('.');
+      if (children && children.length > 0) {
+        return {
+          id: fullPath,
+          Header,
+          columns: getColumns(children, newPath),
+        };
+      } else {
+        return {
+          id: fullPath,
+          Header,
+          accessor: fullPath,
+        };
+      }
+    });
 }
 
 export function GraphQlTypeView({

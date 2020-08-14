@@ -2,8 +2,11 @@ import { Restructure, SimpleField, TreeNode } from '../lib/restructure';
 import { format } from 'graphql-formatter';
 
 export type QueryField = SimpleField & {
+  disabled?: boolean;
   children?: QueryField[];
 };
+
+type Fields = (string | { [key: string]: Fields })[];
 
 export function buildQueryGraph(
   structure: Restructure,
@@ -37,11 +40,12 @@ export function buildQueryGraph(
     for (const child of node.children) {
       if (child.field.typeRef.kind !== 'OBJECT') {
         children.push(child.field);
-      } else if (substructures && child.query) {
+      } else if (child.query) {
         const subChildren = recurse(child);
         if (subChildren.length > 0) {
           children.push({
             ...child.field,
+            disabled: substructures,
             children: subChildren,
           });
         }
@@ -57,14 +61,18 @@ export function buildQueryGraph(
 export function renderGraph(graph: QueryField) {
   let query = '';
 
-  function recurse(graph: QueryField) {
-    query += `${graph.name}`;
+  function recurse(graph: QueryField, disabled: boolean = false) {
+    if (graph.disabled) {
+      disabled = true;
+    }
+    const comment = disabled ? '# ' : '';
+    query += `${comment}${graph.name}`;
     if (graph.children && graph.children.length > 0) {
-      query += `{\n`;
+      query += ` {\n`;
       for (const child of graph.children) {
-        recurse(child);
+        recurse(child, disabled || graph.disabled);
       }
-      query += `}`;
+      query += `${comment}}`;
     }
     query += '\n';
   }
