@@ -23,7 +23,7 @@ function cellValue(value: any): React.ReactNode {
     return <div className={styles.null}>NO VALUE</div>;
   }
   if (value === '') {
-    return <div className={styles.empty}>EMPTY STRING</div>;
+    return <div className={styles.empty}>EMPTY</div>;
   }
   if (typeof value === 'number') {
     return <div className={styles.number}>{value}</div>;
