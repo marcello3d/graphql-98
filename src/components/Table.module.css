@@ -15,7 +15,7 @@
   top: 0; /* Don't forget this, required for the stickiness */
 }
 .emptyColumn {
-  visibility: hidden;
+  background: var(--surface);
 }
 .column,
 .cell {

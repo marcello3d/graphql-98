@@ -34,6 +34,24 @@ function cellValue(value: any): React.ReactNode {
   return <div className={styles.text}>{value}</div>;
 }
 
+function getColumns(fields: QueryField[], path: string[] = []): Column[] {
+  return fields.map(({ name, typeRef, children }) => {
+    const newPath = [...path, name];
+    const Header = `${name}: ${formatType(typeRef)}`;
+    if (children && children.length > 0) {
+      return {
+        Header,
+        columns: getColumns(children, newPath),
+      };
+    } else {
+      return {
+        Header,
+        accessor: newPath.join('.'),
+      };
+    }
+  });
+}
+
 export function GraphQlTypeView({
   structure,
   path,
@@ -55,23 +73,6 @@ export function GraphQlTypeView({
       walkData = walkData?.[path[i]];
     }
     rows = Array.isArray(walkData) ? walkData : [walkData];
-  }
-  function getColumns(fields: QueryField[], path: string[] = []): Column[] {
-    return fields.map(({ name, typeRef, children }) => {
-      const newPath = [...path, name];
-      const Header = `${name}: ${formatType(typeRef)}`;
-      if (children && children.length > 0) {
-        return {
-          Header,
-          columns: getColumns(children, newPath),
-        };
-      } else {
-        return {
-          Header,
-          accessor: newPath.join('.'),
-        };
-      }
-    });
   }
   const columns = useMemo(() => getColumns(fields), [fields]);
   return (

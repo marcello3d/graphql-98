@@ -30,7 +30,14 @@ export const Table = React.memo(function TableInner({
               {...headerGroup.getHeaderGroupProps()}
             >
               {headerGroup.headers.map((column) => (
-                <th className={styles.column} {...column.getHeaderProps()}>
+                <th
+                  className={
+                    typeof column.Header === 'function'
+                      ? styles.emptyColumn
+                      : styles.column
+                  }
+                  {...column.getHeaderProps()}
+                >
                   {column.render('Header')}
                 </th>
               ))}
