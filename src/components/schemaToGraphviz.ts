@@ -55,7 +55,7 @@ ${object.fields
   .map(
     (field) =>
       `
-  ${object.name}:_${field.name} -> ${getSimpleTypeRef(field.type).name}:root`,
+  ${object.name}:_${field.name} -> ${getSimpleTypeRef(field.type).name}`,
   )
   .join('')}
 
