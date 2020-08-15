@@ -11,7 +11,7 @@ type Fields = (string | { [key: string]: Fields })[];
 export function buildQueryGraph(
   structure: Restructure,
   path: string[],
-  substructures: boolean = false,
+  substructures: boolean,
 ): {
   field: RestructureField;
   queryGraph: QueryField;

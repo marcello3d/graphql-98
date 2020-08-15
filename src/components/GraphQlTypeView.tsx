@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { ChangeEvent, useCallback, useMemo } from 'react';
 
 import styles from './GraphQlTypeView.module.css';
 
@@ -9,6 +9,7 @@ import { GraphQlError } from './GraphQlError';
 import { buildQueryGraph, QueryField, renderQuery } from './queryBuilder';
 import { Column } from 'react-table';
 import { formatType } from '../lib/restructureFormatters';
+import { BooleanParam, useQueryParam } from 'use-query-params';
 
 function cellValue(value: any): React.ReactNode {
   if (value === true) {
@@ -70,8 +71,24 @@ export function GraphQlTypeView({
   structure: Restructure;
   path: string[];
 }) {
-  const { queryGraph, fields } = buildQueryGraph(structure, path);
+  const [querySubstructures, setSubstructures] = useQueryParam(
+    'ss',
+    BooleanParam,
+  );
+  const substructures = !!querySubstructures;
+  const { queryGraph, fields } = buildQueryGraph(
+    structure,
+    path,
+    substructures,
+  );
   console.log('queryGraph', queryGraph);
+
+  const onChangeSubstructures = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      setSubstructures(event.currentTarget.checked ? true : undefined);
+    },
+    [setSubstructures],
+  );
 
   const query = renderQuery(queryGraph);
   const { error, data } = useQuery(query, {});
@@ -88,8 +105,17 @@ export function GraphQlTypeView({
   return (
     <>
       <fieldset>
-        <legend>Raw GraphQL Query</legend>
-        <pre>{query}</pre>
+        <legend>GraphQL Query</legend>
+        <div className={styles.row}>
+          <input
+            type="checkbox"
+            checked={substructures}
+            onChange={onChangeSubstructures}
+            id="substructures"
+          />{' '}
+          <label htmlFor="substructures">Query substructures</label>
+        </div>
+        <textarea className={styles.query} readOnly={true} value={query} />
       </fieldset>
       {error ? (
         <GraphQlError title="Query error" error={error} />

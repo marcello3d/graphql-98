@@ -43,3 +43,12 @@
   text-overflow: ellipsis;
   vertical-align: center;
 }
+
+.query {
+  font-family: monospace;
+  width: 100%;
+  height: 200px;
+}
+.row {
+  margin: 5px 0;
+}

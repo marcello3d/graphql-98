@@ -1,10 +1,9 @@
 .root {
-}
-.table {
   background: var(--button-highlight);
   box-shadow: var(--border-field);
   padding: 2px;
-  margin: 6px;
+}
+.table {
   border-spacing: 0;
   overflow-x: auto;
 }
