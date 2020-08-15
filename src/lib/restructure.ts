@@ -126,6 +126,9 @@ export function restructure(schema: IntrospectionSchema): Restructure {
   for (const type of types) {
     if (type.raw.kind === 'OBJECT') {
       type.fields = type.raw.fields.map(mapField);
+      for (const field of type.fields) {
+        type.fieldMap[field.name] = field;
+      }
     }
   }
 

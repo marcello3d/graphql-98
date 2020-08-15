@@ -11,7 +11,7 @@ type Fields = (string | { [key: string]: Fields })[];
 export function buildQueryGraph(
   structure: Restructure,
   path: string[],
-  substructures: boolean = true,
+  substructures: boolean = false,
 ): {
   field: RestructureField;
   queryGraph: QueryField;
@@ -28,12 +28,12 @@ export function buildQueryGraph(
   for (let i = 1; i < path.length; i++) {
     const name = path[i];
     field = field.typeRef.type.fieldMap[name];
-    const newChildren: QueryField[] = [];
-    children.push({ ...field, children: newChildren });
-    children = newChildren;
     if (!field) {
       throw new Error(`invalid path item ${name} in ${path.join('.')}`);
     }
+    const newChildren: QueryField[] = [];
+    children.push({ ...field, children: newChildren });
+    children = newChildren;
   }
 
   function recurse(
@@ -51,7 +51,7 @@ export function buildQueryGraph(
         if (subChildren.length > 0) {
           children.push({
             ...subField,
-            disabled: substructures,
+            disabled: !substructures,
             children: subChildren,
           });
         }
