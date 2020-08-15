@@ -17,6 +17,7 @@ type TypeMap = Record<string, RestructureType>;
 export type RestructureType = {
   name: string;
   raw: IntrospectionType;
+  cyclic: boolean;
   fields: RestructureField[];
   fieldMap: Record<string, RestructureField>;
 };
@@ -55,6 +56,7 @@ export function restructure(schema: IntrospectionSchema): Restructure {
       (raw: IntrospectionType): RestructureType => ({
         raw,
         name: raw.name,
+        cyclic: false,
         fields: [],
         fieldMap: {},
       }),
@@ -123,6 +125,7 @@ export function restructure(schema: IntrospectionSchema): Restructure {
     };
   }
 
+  // Fill in fields (requires types/typeMap to be enumerated)
   for (const type of types) {
     if (type.raw.kind === 'OBJECT') {
       type.fields = type.raw.fields.map(mapField);
@@ -130,6 +133,19 @@ export function restructure(schema: IntrospectionSchema): Restructure {
         type.fieldMap[field.name] = field;
       }
     }
+  }
+
+  // Find cycles (requires fields to be filled in)
+  for (const type of types) {
+    const seen = new Set<RestructureType>();
+    function isCyclic(type: RestructureType): boolean {
+      if (seen.has(type) || type.cyclic) {
+        return true;
+      }
+      seen.add(type);
+      return type.fields.some((field) => isCyclic(field.typeRef.type));
+    }
+    type.cyclic = isCyclic(type);
   }
 
   const result: Restructure = {

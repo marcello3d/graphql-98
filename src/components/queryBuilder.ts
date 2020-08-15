@@ -49,7 +49,7 @@ export function buildQueryGraph(
         if (subField.typeRef.type.fields.length === 0) {
           children.push(subField);
         } else {
-          const subChildren = recurse(subField, [], depth + 5);
+          const subChildren = recurse(subField, [], depth + 1);
           if (subChildren.length > 0) {
             children.push({
               ...subField,

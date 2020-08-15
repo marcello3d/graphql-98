@@ -64,7 +64,7 @@ function NodeItem({
       </Link>
       {field.args.length > 0 && <>({field.args.map(formatArg).join(', ')})</>}:{' '}
       {formatType(field.typeRef)}
-      {field.showChildren && (
+      {field.showChildren && !field.typeRef.type.cyclic && (
         <ul>
           {subFields.map((subField) => (
             <NodeItem
