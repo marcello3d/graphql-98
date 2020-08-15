@@ -27,7 +27,14 @@ ${structure.types
         const typeText = formatType(typeRef, isFunc);
         const nameText = `${name}${
           isFunc
-            ? `(${args.map(formatArg).join(', ')})`
+            ? `(${args
+                .slice(0, 4)
+                .map((arg, index) =>
+                  index === 3
+                    ? '…'
+                    : arg.name + (arg.typeRef.required ? '' : '?'),
+                )
+                .join(', ')})`
             : typeRef.required
             ? ''
             : '?'
