@@ -53,7 +53,8 @@ function NodeItem({
   field: RestructureField;
   path?: string[];
 }) {
-  if (!field.show) {
+  const subFields = field.typeRef.type.fields;
+  if (subFields.length === 0 || path.length > 10) {
     return null;
   }
   return (
@@ -65,7 +66,7 @@ function NodeItem({
       {formatType(field.typeRef)}
       {field.showChildren && (
         <ul>
-          {field.typeRef.type.fields.map((subField) => (
+          {subFields.map((subField) => (
             <NodeItem
               key={subField.name}
               field={subField}

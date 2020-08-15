@@ -38,22 +38,25 @@ export function buildQueryGraph(
 
   function recurse(
     node: RestructureField,
-    children: QueryField[] = [],
+    children: QueryField[],
+    depth = 0,
   ): QueryField[] {
-    for (const subField of node.typeRef.type.fields) {
-      if (!subField.query) {
-        continue;
-      }
-      if (subField.typeRef.type.fields.length === 0) {
-        children.push(subField);
-      } else {
-        const subChildren = recurse(subField);
-        if (subChildren.length > 0) {
-          children.push({
-            ...subField,
-            disabled: !substructures,
-            children: subChildren,
-          });
+    if (depth < 5) {
+      for (const subField of node.typeRef.type.fields) {
+        if (!subField.query) {
+          continue;
+        }
+        if (subField.typeRef.type.fields.length === 0) {
+          children.push(subField);
+        } else {
+          const subChildren = recurse(subField, [], depth + 5);
+          if (subChildren.length > 0) {
+            children.push({
+              ...subField,
+              disabled: !substructures,
+              children: subChildren,
+            });
+          }
         }
       }
     }

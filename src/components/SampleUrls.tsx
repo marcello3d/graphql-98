@@ -9,7 +9,7 @@ const sampleUrls: readonly {
   infoUrl: string;
 }[] = [
   {
-    name: 'Artsy',
+    name: 'Artsy (warning, semi-broken)',
     url: 'https://metaphysics-production.artsy.net',
     infoUrl: 'https://github.com/artsy/metaphysics',
   },
