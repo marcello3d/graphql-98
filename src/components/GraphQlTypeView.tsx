@@ -2,12 +2,13 @@ import React, { useMemo } from 'react';
 
 import styles from './GraphQlTypeView.module.css';
 
-import { formatType, Restructure } from '../lib/restructure';
+import { Restructure } from '../lib/restructure';
 import { useQuery } from 'graphql-hooks';
 import { Table } from './Table';
 import { GraphQlError } from './GraphQlError';
-import { buildQueryGraph, QueryField, renderGraph } from './queryBuilder';
+import { buildQueryGraph, QueryField, renderQuery } from './queryBuilder';
 import { Column } from 'react-table';
+import { formatType } from '../lib/restructureFormatters';
 
 function cellValue(value: any): React.ReactNode {
   if (value === true) {
@@ -72,7 +73,7 @@ export function GraphQlTypeView({
   const { queryGraph, fields } = buildQueryGraph(structure, path);
   console.log('queryGraph', queryGraph);
 
-  const query = renderGraph(queryGraph);
+  const query = renderQuery(queryGraph);
   const { error, data } = useQuery(query, {});
   console.log('Raw data', data);
   let rows: object[] | undefined = undefined;

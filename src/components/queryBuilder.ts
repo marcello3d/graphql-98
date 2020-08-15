@@ -1,7 +1,7 @@
-import { Restructure, SimpleField, TreeNode } from '../lib/restructure';
+import { Restructure, RestructureField } from '../lib/restructure';
 import { format } from 'graphql-formatter';
 
-export type QueryField = SimpleField & {
+export type QueryField = RestructureField & {
   disabled?: boolean;
   children?: QueryField[];
 };
@@ -13,38 +13,44 @@ export function buildQueryGraph(
   path: string[],
   substructures: boolean = true,
 ): {
-  node: TreeNode;
+  field: RestructureField;
   queryGraph: QueryField;
   fields: QueryField[];
 } {
-  let node = structure.queryType;
+  let field: RestructureField = structure.queryField;
   let children: QueryField[] = [];
 
   const queryGraph: QueryField = {
-    ...node.field,
+    ...field,
     children,
   };
 
   for (let i = 1; i < path.length; i++) {
     const name = path[i];
-    node = node.childMap[name];
+    field = field.typeRef.type.fieldMap[name];
     const newChildren: QueryField[] = [];
-    children.push({ ...node.field, children: newChildren });
+    children.push({ ...field, children: newChildren });
     children = newChildren;
-    if (!node) {
+    if (!field) {
       throw new Error(`invalid path item ${name} in ${path.join('.')}`);
     }
   }
 
-  function recurse(node: TreeNode, children: QueryField[] = []): QueryField[] {
-    for (const child of node.children) {
-      if (child.field.typeRef.kind !== 'OBJECT') {
-        children.push(child.field);
-      } else if (child.query) {
-        const subChildren = recurse(child);
+  function recurse(
+    node: RestructureField,
+    children: QueryField[] = [],
+  ): QueryField[] {
+    for (const subField of node.typeRef.type.fields) {
+      if (!subField.query) {
+        continue;
+      }
+      if (subField.typeRef.type.fields.length === 0) {
+        children.push(subField);
+      } else {
+        const subChildren = recurse(subField);
         if (subChildren.length > 0) {
           children.push({
-            ...child.field,
+            ...subField,
             disabled: substructures,
             children: subChildren,
           });
@@ -53,12 +59,12 @@ export function buildQueryGraph(
     }
     return children;
   }
-  recurse(node, children);
+  recurse(field, children);
 
-  return { node, queryGraph, fields: children };
+  return { field, queryGraph, fields: children };
 }
 
-export function renderGraph(graph: QueryField) {
+export function renderQuery(graph: QueryField) {
   let query = '';
 
   function recurse(graph: QueryField, disabled: boolean = false) {

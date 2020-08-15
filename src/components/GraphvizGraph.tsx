@@ -12,7 +12,6 @@ export function GraphvizGraph({ graph }: { graph: string }) {
     | { type: 'error'; error: Error }
     | undefined
   >(undefined);
-  const [svgError, setSvgError] = useState<Error | undefined>(undefined);
 
   useEffect(() => {
     let active = true;

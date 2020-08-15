@@ -13,12 +13,12 @@ export function IntrospectedGraphQl({
   schema,
 }: {
   url: string;
+  reloadSchema: () => void;
   schema: IntrospectionSchema;
 }) {
   const [queryPath, setQueryPath] = useQueryParam('path', StringParam);
 
   const structure = useMemo(() => restructure(schema), [schema]);
-  console.log('structure', structure);
 
   const goRoot = useCallback(() => {
     setQueryPath(undefined);
