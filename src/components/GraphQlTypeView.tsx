@@ -35,15 +35,27 @@ function cellValue(value: any): React.ReactNode {
     if (/^\s*(http|https):\/\//.test(value)) {
       return (
         <div className={styles.url}>
-          <a href={value} rel="nofollow noreferrer" target="_blank">
-            {value}
-          </a>
+          <div className={styles.overflow}>
+            <a href={value} rel="nofollow noreferrer" target="_blank">
+              {value}
+            </a>
+          </div>
         </div>
       );
     }
-    return <div className={styles.text}>{value}</div>;
+    return (
+      <div className={styles.text}>
+        <div className={styles.overflow}>{value}</div>
+      </div>
+    );
   }
-  return <div className={styles.json}>{JSON.stringify(value)}</div>;
+  return (
+    <div className={styles.json}>
+      <div className={styles.overflow}>
+        {JSON.stringify(value).replace(/([{,])"(.*?)":/g, '$1 $2: ')}
+      </div>
+    </div>
+  );
 }
 
 function getColumns(

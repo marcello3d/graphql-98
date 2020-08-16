@@ -10,12 +10,17 @@
 .null,
 .empty,
 .number {
-  padding: 2px 2px;
-  font-size: 0.8em;
+  padding: 2px;
+  font-size: 12px;
   display: flex;
   flex-direction: row;
+  align-items: center;
+  width: 100%;
+}
+.overflow {
+  display: flex;
+  max-height: 28px;
   overflow: hidden;
-  max-height: 2.3em;
 }
 .true {
   font-weight: bold;
@@ -36,7 +41,7 @@
 }
 .json {
   color: #075855;
-  line-break: anywhere;
+  line-break: auto;
 }
 
 .text {
