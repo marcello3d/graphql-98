@@ -10,7 +10,6 @@ import { buildQueryGraph, QueryField, renderQuery } from './queryBuilder';
 import { Column } from 'react-table';
 import { formatType } from '../lib/restructureFormatters';
 import { useBooleanQuery } from '../hooks/useBooleanQuery';
-import { EmojiIcon } from './EmojiIcon';
 
 function cellValue(value: any): React.ReactNode {
   if (value === true) {

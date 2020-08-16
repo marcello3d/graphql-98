@@ -1,7 +1,11 @@
-import Viz from 'viz.js';
-import { Module, render } from 'viz.js/full.render.js';
-
+// This is some hacking to get viz.js to load asynchronously using es modules
 export async function renderSvg(graph: string): Promise<string> {
-  const viz = new Viz({ Module, render });
-  return viz.renderString(graph);
+  // @ts-ignore
+  const viz = await import(/* webpackIgnore: true */ '/viz.js-2.1.2/viz.es.js');
+  // @ts-ignore
+  window.Viz = viz.default;
+  // @ts-ignore
+  await import(/* webpackIgnore: true */ '/viz.js-2.1.2/full.render.es.js');
+  // @ts-ignore
+  return new Viz().renderString(graph);
 }
