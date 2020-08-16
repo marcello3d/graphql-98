@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { StringParam, useQueryParam } from 'use-query-params';
 import { RouteComponentProps } from '@reach/router';
 
 import styles from './GraphQl98.module.css';
 import { GraphQlUrlChooser } from './GraphQlUrlChooser';
+import { githubUrl } from './about';
 
 export function GraphQl98(props: RouteComponentProps) {
   const [url] = useQueryParam('url', StringParam);
@@ -27,15 +28,10 @@ export function GraphQl98(props: RouteComponentProps) {
       <div className="window">
         <div className="title-bar">
           <div className="title-bar-text">About</div>
-          <div className="title-bar-controls">
-            <button aria-label="Help" disabled />
-            <button aria-label="Close" disabled />
-          </div>
         </div>
         <footer className="window-body">
           Developed by <a href="https://marcello.cellosoft.com/">Marcello</a>{' '}
-          for funsies. Source on{' '}
-          <a href="https://github.com/marcello3d/graphql-98">Github</a>
+          for funsies. Source on <a href={githubUrl}>Github</a>
         </footer>
       </div>
     </div>

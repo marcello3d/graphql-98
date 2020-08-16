@@ -1,6 +1,5 @@
 import styles from './GraphQlUrlChooser.module.css';
 import { GraphQlWrapper } from './GraphQlWrapper';
-import { SampleUrls } from './SampleUrls';
 import React, {
   ChangeEvent,
   FormEvent,
@@ -9,6 +8,8 @@ import React, {
   useState,
 } from 'react';
 import { StringParam, useQueryParam } from 'use-query-params';
+import { githubUrl } from './about';
+import { WhatIsThis } from './WhatIsThis';
 
 export function GraphQlUrlChooser() {
   const [url, setQueryUrl] = useQueryParam('url', StringParam);
@@ -44,14 +45,17 @@ export function GraphQlUrlChooser() {
     [tempUrl, setQueryUrl],
   );
 
+  const goToGithub = useCallback(() => {
+    window.location.href = githubUrl;
+  }, []);
+
   return (
     <>
       <div className="window">
         <div className="title-bar">
           <div className="title-bar-text">GraphQL ‘98</div>
           <div className="title-bar-controls">
-            <button aria-label="Help" disabled />
-            <button aria-label="Close" disabled />
+            <button aria-label="Help" onClick={goToGithub} />
           </div>
         </div>
         <main className="window-body">
@@ -82,7 +86,6 @@ export function GraphQlUrlChooser() {
           <div className="title-bar">
             <div className="title-bar-text">{url}</div>
             <div className="title-bar-controls">
-              <button aria-label="Help" disabled />
               <button aria-label="Close" onClick={goHome} />
             </div>
           </div>
@@ -91,18 +94,7 @@ export function GraphQlUrlChooser() {
           </main>
         </div>
       ) : (
-        <div className="window">
-          <div className="title-bar">
-            <div className="title-bar-text">Here are some schemas to try…</div>
-            <div className="title-bar-controls">
-              <button aria-label="Help" disabled />
-              <button aria-label="Close" disabled />
-            </div>
-          </div>
-          <main className="window-body">
-            <SampleUrls />
-          </main>
-        </div>
+        WhatIsThis
       )}
     </>
   );
