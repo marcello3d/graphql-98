@@ -10,6 +10,7 @@ import { buildQueryGraph, QueryField, renderQuery } from './queryBuilder';
 import { Column } from 'react-table';
 import { formatType } from '../lib/restructureFormatters';
 import { useBooleanQuery } from '../hooks/useBooleanQuery';
+import { EmojiIcon } from './EmojiIcon';
 
 function cellValue(value: any): React.ReactNode {
   if (value === true) {
@@ -98,7 +99,7 @@ export function GraphQlTypeView({
 }) {
   const [substructures, setSubstructures] = useBooleanQuery('ss');
   const [expandColumns, setExpandColumns] = useBooleanQuery('ec');
-  const { queryGraph, fields } = buildQueryGraph(
+  const { queryGraph, field, fields } = buildQueryGraph(
     structure,
     path,
     substructures,
@@ -114,7 +115,9 @@ export function GraphQlTypeView({
     for (let i = 1; i < path.length; i++) {
       walkData = walkData?.[path[i]];
     }
-    rows = Array.isArray(walkData) ? walkData : [walkData];
+    if (Array.isArray(walkData)) {
+      rows = walkData;
+    }
   }
   const columns = useMemo(() => getColumns(fields, expandColumns), [
     expandColumns,
@@ -146,9 +149,39 @@ export function GraphQlTypeView({
       </fieldset>
       {error ? (
         <GraphQlError title="Query error" error={error} />
-      ) : (
+      ) : field.collection ? (
         <Table columns={columns} data={rows} renderCell={cellValue} />
+      ) : (
+        <Tree data={data} />
       )}
     </>
+  );
+}
+
+function Tree({ data }: { data: any }) {
+  function recurse(data: any) {
+    if (data && typeof data === 'object') {
+      return (
+        <>
+          <ul>
+            {Object.keys(data).map((key) => (
+              <li key={key} className={styles.treeNode}>
+                <span className={styles.treeKey}>{key}</span>{' '}
+                {recurse(data[key])}
+              </li>
+            ))}
+          </ul>
+        </>
+      );
+    }
+    return cellValue(data);
+  }
+  return (
+    <ul className="tree-view">
+      <li>
+        Result
+        {recurse(data)}
+      </li>
+    </ul>
   );
 }

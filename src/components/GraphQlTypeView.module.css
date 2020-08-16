@@ -64,3 +64,13 @@
 .row {
   margin: 5px 0;
 }
+
+.treeNode div {
+  display: inline;
+}
+.treeKey {
+  font-weight: bold;
+}
+.treeNode a {
+  text-decoration: underline !important;
+}
