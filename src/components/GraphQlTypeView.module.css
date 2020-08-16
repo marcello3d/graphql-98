@@ -16,11 +16,15 @@
   flex-direction: row;
   align-items: center;
   width: 100%;
+  min-height: 28px;
 }
 .overflow {
-  display: flex;
-  max-height: 28px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 .true {
   font-weight: bold;
