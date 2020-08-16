@@ -2,18 +2,29 @@
 .false {
   text-align: center;
 }
+.url,
 .text,
+.json,
 .true,
 .false,
 .null,
 .empty,
 .number {
-  padding: 2px 2px;
-  height: 2.2em;
-  font-size: 0.8em;
+  padding: 2px;
+  font-size: 12px;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  min-height: 28px;
+}
+.overflow {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .true {
   font-weight: bold;
@@ -33,7 +44,8 @@
   text-align: right;
 }
 .json {
-  color: #00830f;
+  color: #075855;
+  line-break: auto;
 }
 
 .text {
@@ -42,4 +54,13 @@
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: center;
+}
+
+.query {
+  font-family: monospace;
+  width: 100%;
+  height: 200px;
+}
+.row {
+  margin: 5px 0;
 }

@@ -43,7 +43,11 @@ export function GraphQlWrapper({ url }: { url: string }) {
 
   return (
     <ClientContext.Provider value={client}>
-      <IntrospectedGraphQl url={url} schema={data.__schema} />
+      <IntrospectedGraphQl
+        url={url}
+        reloadSchema={refetch}
+        schema={data.__schema}
+      />
     </ClientContext.Provider>
   );
 }

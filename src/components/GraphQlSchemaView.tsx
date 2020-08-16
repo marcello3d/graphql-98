@@ -1,16 +1,12 @@
 import React from 'react';
 
-import {
-  formatArg,
-  formatType,
-  Restructure,
-  TreeNode,
-} from '../lib/restructure';
+import { Restructure, RestructureField } from '../lib/restructure';
 import { Link } from '@reach/router';
 import { stringify } from 'query-string';
 import { GraphvizGraph } from './GraphvizGraph';
 import { computeGraph } from './schemaToGraphviz';
 import { EmojiIcon } from './EmojiIcon';
+import { formatArg, formatType } from '../lib/restructureFormatters';
 
 export function GraphQlSchemaView({
   url,
@@ -19,7 +15,6 @@ export function GraphQlSchemaView({
   url: string;
   structure: Restructure;
 }) {
-  const { queryType } = structure;
   const graph = computeGraph(structure);
   return (
     <>
@@ -27,7 +22,7 @@ export function GraphQlSchemaView({
         <li>
           <EmojiIcon emoji="🗃" label="root" /> {url}
           <ul>
-            <NodeItem node={queryType} url={url} />
+            <NodeItem field={structure.queryField} url={url} />
           </ul>
         </li>
       </ul>
@@ -36,14 +31,14 @@ export function GraphQlSchemaView({
   );
 }
 
-function NodeIcon({ node }: { node: TreeNode }) {
-  if (node.collection) {
+function NodeIcon({ field }: { field: RestructureField }) {
+  if (field.collection) {
     return <EmojiIcon emoji="🛄" label="collection" />;
   }
-  if (node.requiredArgs.length > 0) {
+  if (field.requiredArgs > 0) {
     return <EmojiIcon emoji="✴️" label="function" />;
   }
-  if (node.children.length > 0) {
+  if (field.typeRef.type.fields.length > 0) {
     return <EmojiIcon emoji="🔡" label="container" />;
   }
   return <EmojiIcon emoji="❇️" label="value" />;
@@ -51,32 +46,32 @@ function NodeIcon({ node }: { node: TreeNode }) {
 
 function NodeItem({
   url,
-  node,
-  path = [node.field.name],
+  field,
+  path = [field.name],
 }: {
   url: string;
-  node: TreeNode;
+  field: RestructureField;
   path?: string[];
 }) {
-  const { typeRef, args, name } = node.field;
-  if (!node.show) {
+  const subFields = field.typeRef.type.fields;
+  if (subFields.length === 0 || path.length > 10) {
     return null;
   }
   return (
     <li>
       <Link to={`/?${stringify({ url, path: path.join('.') })}`}>
-        <NodeIcon node={node} /> <b>{name}</b>
+        <NodeIcon field={field} /> <b>{field.name}</b>
       </Link>
-      {args.length > 0 && <>({args.map(formatArg).join(', ')})</>}:{' '}
-      {formatType(typeRef)}
-      {node.showChildren && (
+      {field.args.length > 0 && <>({field.args.map(formatArg).join(', ')})</>}:{' '}
+      {formatType(field.typeRef)}
+      {field.showChildren && (
         <ul>
-          {node.children.map((child) => (
+          {subFields.map((subField) => (
             <NodeItem
-              key={child.field.name}
-              node={child}
+              key={subField.name}
+              field={subField}
               url={url}
-              path={[...path, child.field.name]}
+              path={[...path, subField.name]}
             />
           ))}
         </ul>

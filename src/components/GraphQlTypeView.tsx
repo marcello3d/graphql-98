@@ -2,12 +2,14 @@ import React, { useMemo } from 'react';
 
 import styles from './GraphQlTypeView.module.css';
 
-import { formatType, Restructure } from '../lib/restructure';
+import { Restructure } from '../lib/restructure';
 import { useQuery } from 'graphql-hooks';
 import { Table } from './Table';
 import { GraphQlError } from './GraphQlError';
-import { buildQueryGraph, QueryField, renderGraph } from './queryBuilder';
+import { buildQueryGraph, QueryField, renderQuery } from './queryBuilder';
 import { Column } from 'react-table';
+import { formatType } from '../lib/restructureFormatters';
+import { useBooleanQuery } from '../hooks/useBooleanQuery';
 
 function cellValue(value: any): React.ReactNode {
   if (value === true) {
@@ -28,13 +30,38 @@ function cellValue(value: any): React.ReactNode {
   if (typeof value === 'number') {
     return <div className={styles.number}>{value}</div>;
   }
-  if (typeof value === 'object') {
-    return <div className={styles.json}>{JSON.stringify(value)}</div>;
+  if (typeof value === 'string') {
+    if (/^\s*(http|https):\/\//.test(value)) {
+      return (
+        <div className={styles.url}>
+          <div className={styles.overflow}>
+            <a href={value} rel="nofollow noreferrer noopener" target="_blank">
+              {value}
+            </a>
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div className={styles.text}>
+        <div className={styles.overflow}>{value}</div>
+      </div>
+    );
   }
-  return <div className={styles.text}>{value}</div>;
+  return (
+    <div className={styles.json}>
+      <div className={styles.overflow}>
+        {JSON.stringify(value).replace(/([{,])"(.*?)":/g, '$1 $2: ')}
+      </div>
+    </div>
+  );
 }
 
-function getColumns(fields: QueryField[], path: string[] = []): Column[] {
+function getColumns(
+  fields: QueryField[],
+  expandColumns: boolean,
+  path: string[] = [],
+): Column[] {
   return fields
     .filter(({ disabled = false }) => !disabled)
     .map(({ name, typeRef, children }) => {
@@ -45,11 +72,11 @@ function getColumns(fields: QueryField[], path: string[] = []): Column[] {
         </>
       );
       const fullPath = newPath.join('.');
-      if (children && children.length > 0) {
+      if (children && children.length > 0 && expandColumns) {
         return {
           id: fullPath,
           Header,
-          columns: getColumns(children, newPath),
+          columns: getColumns(children, expandColumns, newPath),
         };
       } else {
         return {
@@ -69,10 +96,16 @@ export function GraphQlTypeView({
   structure: Restructure;
   path: string[];
 }) {
-  const { queryGraph, fields } = buildQueryGraph(structure, path);
+  const [substructures, setSubstructures] = useBooleanQuery('ss');
+  const [expandColumns, setExpandColumns] = useBooleanQuery('ec');
+  const { queryGraph, fields } = buildQueryGraph(
+    structure,
+    path,
+    substructures,
+  );
   console.log('queryGraph', queryGraph);
 
-  const query = renderGraph(queryGraph);
+  const query = renderQuery(queryGraph);
   const { error, data } = useQuery(query, {});
   console.log('Raw data', data);
   let rows: object[] | undefined = undefined;
@@ -83,12 +116,33 @@ export function GraphQlTypeView({
     }
     rows = Array.isArray(walkData) ? walkData : [walkData];
   }
-  const columns = useMemo(() => getColumns(fields), [fields]);
+  const columns = useMemo(() => getColumns(fields, expandColumns), [
+    expandColumns,
+    fields,
+  ]);
   return (
     <>
       <fieldset>
-        <legend>Raw GraphQL Query</legend>
-        <pre>{query}</pre>
+        <legend>GraphQL Query</legend>
+        <div className={styles.row}>
+          <input
+            type="checkbox"
+            checked={substructures}
+            onChange={setSubstructures}
+            id="substructures"
+          />{' '}
+          <label htmlFor="substructures">Query substructures</label>
+        </div>
+        <div className={styles.row}>
+          <input
+            type="checkbox"
+            checked={expandColumns}
+            onChange={setExpandColumns}
+            id="expand_substructures"
+          />{' '}
+          <label htmlFor="expand_substructures">Expand columns</label>
+        </div>
+        <textarea className={styles.query} readOnly={true} value={query} />
       </fieldset>
       {error ? (
         <GraphQlError title="Query error" error={error} />
