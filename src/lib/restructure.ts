@@ -11,6 +11,7 @@ export type Restructure = {
   types: readonly RestructureType[];
   typeMap: TypeMap;
   queryField: RestructureField;
+  typeQueries: Record<string, RestructureLookup[]>;
 };
 
 type TypeMap = Record<string, RestructureType>;
@@ -34,6 +35,12 @@ export type RestructureTypeRef = {
 export type RestructureArg = {
   name: string;
   typeRef: RestructureTypeRef;
+};
+
+export type RestructureLookup = {
+  path: string[];
+  queryField: RestructureField;
+  matchedArgs: RestructureArg[];
 };
 
 export type RestructureField = {
@@ -153,9 +160,45 @@ export function restructure(schema: IntrospectionSchema): Restructure {
     checkCycles(type, {});
   }
 
+  const typeQueries: Record<string, RestructureLookup[]> = {};
+  // Find lookup query functions
+  for (const { fields } of types) {
+    for (const field of fields) {
+      if (field.args.length === 0) {
+        continue;
+      }
+      const targetType = field.typeRef.type;
+      const matchedArgs = field.args.filter((arg) => {
+        const typeRef = targetType.fieldMap[arg.name]?.typeRef;
+        return (
+          typeRef &&
+          typeRef.type === arg.typeRef.type &&
+          typeRef.array.length === 0 &&
+          arg.typeRef.array.length === 0
+        );
+      });
+      if (matchedArgs.length > 0) {
+        console.log(
+          `Field looks like accessor for ${targetType.name}:`,
+          field,
+          matchedArgs,
+        );
+        const lookups =
+          typeQueries[targetType.name] ?? (typeQueries[targetType.name] = []);
+
+        lookups.push({
+          path: [],
+          queryField: field,
+          matchedArgs,
+        });
+      }
+    }
+  }
+
   const result: Restructure = {
     types: types,
     typeMap,
+    typeQueries,
     queryField: {
       name: 'query',
       typeRef: {
