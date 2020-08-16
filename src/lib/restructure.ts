@@ -17,7 +17,6 @@ type TypeMap = Record<string, RestructureType>;
 export type RestructureType = {
   name: string;
   raw: IntrospectionType;
-  cyclic: boolean;
   fields: RestructureField[];
   fieldMap: Record<string, RestructureField>;
 };
@@ -43,7 +42,7 @@ export type RestructureField = {
   typeRef: RestructureTypeRef;
   requiredArgs: number;
   collection: boolean;
-  // show: boolean;
+  show: boolean;
   showChildren: boolean;
   query: boolean;
 };
@@ -56,7 +55,6 @@ export function restructure(schema: IntrospectionSchema): Restructure {
       (raw: IntrospectionType): RestructureType => ({
         raw,
         name: raw.name,
-        cyclic: false,
         fields: [],
         fieldMap: {},
       }),
@@ -111,15 +109,15 @@ export function restructure(schema: IntrospectionSchema): Restructure {
     const query = !collection && requiredArgs === 0;
 
     const isObject = typeRef.type.raw.kind === 'OBJECT';
-    // const show = isObject && (collection || args.length > 0);
     const showChildren = isObject && !collection && requiredArgs === 0;
+    const show = isObject && (showChildren || collection || args.length > 0);
     return {
       name: field.name,
       typeRef,
       args,
       requiredArgs,
       collection,
-      // show,
+      show,
       showChildren,
       query,
     };
@@ -137,15 +135,22 @@ export function restructure(schema: IntrospectionSchema): Restructure {
 
   // Find cycles (requires fields to be filled in)
   for (const type of types) {
-    const seen = new Set<RestructureType>();
-    function isCyclic(type: RestructureType): boolean {
-      if (seen.has(type) || type.cyclic) {
+    function checkCycles(
+      type: RestructureType,
+      seen: Record<string, boolean>,
+    ): boolean {
+      if (seen[type.name]) {
         return true;
       }
-      seen.add(type);
-      return type.fields.some((field) => isCyclic(field.typeRef.type));
+      const subSet = { ...seen, [type.name]: true };
+      for (const field of type.fields) {
+        if (field.showChildren && checkCycles(field.typeRef.type, subSet)) {
+          field.showChildren = false;
+        }
+      }
+      return false;
     }
-    type.cyclic = isCyclic(type);
+    checkCycles(type, {});
   }
 
   const result: Restructure = {
@@ -163,7 +168,7 @@ export function restructure(schema: IntrospectionSchema): Restructure {
       requiredArgs: 0,
       collection: false,
       query: true,
-      // show: true,
+      show: true,
       showChildren: true,
     },
   };

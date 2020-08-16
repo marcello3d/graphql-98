@@ -85,7 +85,10 @@ export function GraphQlTypeView({
 
   const onChangeSubstructures = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      setSubstructures(event.currentTarget.checked ? true : undefined);
+      setSubstructures(
+        event.currentTarget.checked ? true : undefined,
+        'replaceIn',
+      );
     },
     [setSubstructures],
   );
