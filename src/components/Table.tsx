@@ -1,5 +1,5 @@
 import React from 'react';
-import { Column, useTable } from 'react-table';
+import { Column, ColumnInstance, HeaderGroup, useTable } from 'react-table';
 
 import styles from './Table.module.css';
 
@@ -20,27 +20,62 @@ export const Table = React.memo(function TableInner({
     prepareRow,
   } = useTable<object>({ columns, data: data || [] });
 
+  const depth = headerGroups.length;
+
+  // This is a bunch of gross hacks to get grouped columns rendering in the style I'd like
+  const headers = headerGroups[headerGroups.length - 1].headers;
+  const headerStacks = headers.map((group) => {
+    const stack: HeaderGroup[] = [];
+    function recurse(group?: HeaderGroup) {
+      if (group) {
+        stack.push(group);
+        recurse(group.parent as HeaderGroup);
+      }
+    }
+    recurse(group);
+    return stack.reverse();
+  });
+  function getColSpan(header: HeaderGroup | ColumnInstance): number {
+    if (!header.columns) {
+      return 1;
+    }
+    let count = 0;
+    for (const col of header.columns) {
+      count += getColSpan(col);
+    }
+    return count;
+  }
   return (
     <div className={styles.root}>
       <table className={styles.table} {...getTableProps()}>
         <thead>
-          {headerGroups.map((headerGroup, i) => (
+          {headerGroups.map((headerGroup, row) => (
             <tr
               className={styles.columnRow}
               {...headerGroup.getHeaderGroupProps()}
             >
-              {headerGroup.headers.map((column) => (
-                <th
-                  className={
-                    typeof column.Header === 'function'
-                      ? styles.emptyColumn
-                      : styles.column
-                  }
-                  {...column.getHeaderProps()}
-                >
-                  {column.render('Header')}
-                </th>
-              ))}
+              {headers.map((group, col) => {
+                const header = headerStacks[col][row];
+                if (!header || header === headerStacks[col - 1]?.[row]) {
+                  return null;
+                }
+                const columnDepth = headerStacks[col].length;
+                const rowExtend =
+                  row === columnDepth - 1 ? depth - columnDepth : 0;
+                return (
+                  <th
+                    className={
+                      typeof group.Header === 'function'
+                        ? styles.emptyColumn
+                        : styles.column
+                    }
+                    colSpan={getColSpan(header)}
+                    rowSpan={rowExtend > 0 ? rowExtend + 1 : undefined}
+                  >
+                    {header.Header}
+                  </th>
+                );
+              })}
             </tr>
           ))}
         </thead>
