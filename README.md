@@ -1,7 +1,7 @@
 # GraphQL ‘98 Browser
 
 GraphQL ‘98 Browser is an open source visual GraphQL data browser. Inspired by
-SQL guids like [Postico](https://eggerapps.at/postico/) and
+SQL GUIs like [Postico](https://eggerapps.at/postico/) and
 [Tableplus](https://tableplus.com).
 
 Start by trying the [Live demo](https://graphql-98.vercel.app)
