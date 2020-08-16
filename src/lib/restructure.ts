@@ -54,6 +54,19 @@ export type RestructureField = {
   query: boolean;
 };
 
+function argMatchesTargetType(
+  targetType: RestructureType,
+  argOrField: RestructureArg | RestructureField,
+) {
+  const typeRef = targetType.fieldMap[argOrField.name]?.typeRef;
+  return (
+    typeRef &&
+    typeRef.type === argOrField.typeRef.type &&
+    typeRef.array.length === 0 &&
+    argOrField.typeRef.array.length === 0
+  );
+}
+
 export function restructure(schema: IntrospectionSchema): Restructure {
   console.log(`Processing schema…`);
 
@@ -130,13 +143,39 @@ export function restructure(schema: IntrospectionSchema): Restructure {
     };
   }
 
+  function mapInputField(field: IntrospectionInputValue): RestructureField {
+    const typeRef = mapTypeRef(field.type);
+
+    const collection = typeRef.array.length > 0;
+    const query = !collection;
+
+    const isObject = typeRef.type.raw.kind === 'OBJECT';
+    const showChildren = isObject && !collection;
+    const show = isObject && (showChildren || collection);
+    return {
+      name: field.name,
+      typeRef,
+      args: [],
+      requiredArgs: 0,
+      collection,
+      show,
+      showChildren,
+      query,
+    };
+  }
+
   // Fill in fields (requires types/typeMap to be enumerated)
   for (const type of types) {
-    if (type.raw.kind === 'OBJECT') {
-      type.fields = type.raw.fields.map(mapField);
-      for (const field of type.fields) {
-        type.fieldMap[field.name] = field;
-      }
+    switch (type.raw.kind) {
+      case 'OBJECT':
+        type.fields = type.raw.fields.map(mapField);
+        break;
+      case 'INPUT_OBJECT':
+        type.fields = type.raw.inputFields.map(mapInputField);
+        break;
+    }
+    for (const field of type.fields) {
+      type.fieldMap[field.name] = field;
     }
   }
 
@@ -162,24 +201,25 @@ export function restructure(schema: IntrospectionSchema): Restructure {
 
   const typeQueries: Record<string, RestructureLookup[]> = {};
   // Find lookup query functions
-  for (const { fields } of types) {
+  for (const { name, fields } of types) {
     for (const field of fields) {
+      // No args? Pass
       if (field.args.length === 0) {
         continue;
       }
       const targetType = field.typeRef.type;
       const matchedArgs = field.args.filter((arg) => {
-        const typeRef = targetType.fieldMap[arg.name]?.typeRef;
-        return (
-          typeRef &&
-          typeRef.type === arg.typeRef.type &&
-          typeRef.array.length === 0 &&
-          arg.typeRef.array.length === 0
-        );
+        const argFields = arg.typeRef.type.fields;
+        if (argFields.length > 0) {
+          return argFields.some((argField) =>
+            argMatchesTargetType(targetType, argField),
+          );
+        }
+        return argMatchesTargetType(targetType, arg);
       });
       if (matchedArgs.length > 0) {
         console.log(
-          `Field looks like accessor for ${targetType.name}:`,
+          `Field ${name}.${field.name} looks like accessor for ${targetType.name}:`,
           field,
           matchedArgs,
         );
