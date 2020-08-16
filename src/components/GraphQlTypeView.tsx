@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import styles from './GraphQlTypeView.module.css';
 
@@ -9,7 +9,6 @@ import { GraphQlError } from './GraphQlError';
 import { buildQueryGraph, QueryField, renderQuery } from './queryBuilder';
 import { Column } from 'react-table';
 import { formatType } from '../lib/restructureFormatters';
-import { BooleanParam, useQueryParam } from 'use-query-params';
 import { useBooleanQuery } from '../hooks/useBooleanQuery';
 
 function cellValue(value: any): React.ReactNode {
@@ -36,7 +35,7 @@ function cellValue(value: any): React.ReactNode {
       return (
         <div className={styles.url}>
           <div className={styles.overflow}>
-            <a href={value} rel="nofollow noreferrer" target="_blank">
+            <a href={value} rel="nofollow noreferrer noopener" target="_blank">
               {value}
             </a>
           </div>
@@ -117,7 +116,10 @@ export function GraphQlTypeView({
     }
     rows = Array.isArray(walkData) ? walkData : [walkData];
   }
-  const columns = useMemo(() => getColumns(fields, expandColumns), [fields]);
+  const columns = useMemo(() => getColumns(fields, expandColumns), [
+    expandColumns,
+    fields,
+  ]);
   return (
     <>
       <fieldset>
