@@ -2,18 +2,20 @@
 .false {
   text-align: center;
 }
+.url,
 .text,
+.json,
 .true,
 .false,
 .null,
 .empty,
 .number {
   padding: 2px 2px;
-  height: 2.2em;
   font-size: 0.8em;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex-direction: row;
+  overflow: hidden;
+  max-height: 2.3em;
 }
 .true {
   font-weight: bold;
@@ -33,7 +35,8 @@
   text-align: right;
 }
 .json {
-  color: #00830f;
+  color: #075855;
+  line-break: anywhere;
 }
 
 .text {

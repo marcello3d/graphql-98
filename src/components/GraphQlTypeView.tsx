@@ -10,6 +10,7 @@ import { buildQueryGraph, QueryField, renderQuery } from './queryBuilder';
 import { Column } from 'react-table';
 import { formatType } from '../lib/restructureFormatters';
 import { BooleanParam, useQueryParam } from 'use-query-params';
+import { useBooleanQuery } from '../hooks/useBooleanQuery';
 
 function cellValue(value: any): React.ReactNode {
   if (value === true) {
@@ -30,13 +31,26 @@ function cellValue(value: any): React.ReactNode {
   if (typeof value === 'number') {
     return <div className={styles.number}>{value}</div>;
   }
-  if (typeof value === 'object') {
-    return <div className={styles.json}>{JSON.stringify(value)}</div>;
+  if (typeof value === 'string') {
+    if (/^\s*(http|https):\/\//.test(value)) {
+      return (
+        <div className={styles.url}>
+          <a href={value} rel="nofollow noreferrer" target="_blank">
+            {value}
+          </a>
+        </div>
+      );
+    }
+    return <div className={styles.text}>{value}</div>;
   }
-  return <div className={styles.text}>{value}</div>;
+  return <div className={styles.json}>{JSON.stringify(value)}</div>;
 }
 
-function getColumns(fields: QueryField[], path: string[] = []): Column[] {
+function getColumns(
+  fields: QueryField[],
+  expandColumns: boolean,
+  path: string[] = [],
+): Column[] {
   return fields
     .filter(({ disabled = false }) => !disabled)
     .map(({ name, typeRef, children }) => {
@@ -47,11 +61,11 @@ function getColumns(fields: QueryField[], path: string[] = []): Column[] {
         </>
       );
       const fullPath = newPath.join('.');
-      if (children && children.length > 0) {
+      if (children && children.length > 0 && expandColumns) {
         return {
           id: fullPath,
           Header,
-          columns: getColumns(children, newPath),
+          columns: getColumns(children, expandColumns, newPath),
         };
       } else {
         return {
@@ -71,27 +85,14 @@ export function GraphQlTypeView({
   structure: Restructure;
   path: string[];
 }) {
-  const [querySubstructures, setSubstructures] = useQueryParam(
-    'ss',
-    BooleanParam,
-  );
-  const substructures = !!querySubstructures;
+  const [substructures, setSubstructures] = useBooleanQuery('ss');
+  const [expandColumns, setExpandColumns] = useBooleanQuery('ec');
   const { queryGraph, fields } = buildQueryGraph(
     structure,
     path,
     substructures,
   );
   console.log('queryGraph', queryGraph);
-
-  const onChangeSubstructures = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      setSubstructures(
-        event.currentTarget.checked ? true : undefined,
-        'replaceIn',
-      );
-    },
-    [setSubstructures],
-  );
 
   const query = renderQuery(queryGraph);
   const { error, data } = useQuery(query, {});
@@ -104,7 +105,7 @@ export function GraphQlTypeView({
     }
     rows = Array.isArray(walkData) ? walkData : [walkData];
   }
-  const columns = useMemo(() => getColumns(fields), [fields]);
+  const columns = useMemo(() => getColumns(fields, expandColumns), [fields]);
   return (
     <>
       <fieldset>
@@ -113,10 +114,19 @@ export function GraphQlTypeView({
           <input
             type="checkbox"
             checked={substructures}
-            onChange={onChangeSubstructures}
+            onChange={setSubstructures}
             id="substructures"
           />{' '}
           <label htmlFor="substructures">Query substructures</label>
+        </div>
+        <div className={styles.row}>
+          <input
+            type="checkbox"
+            checked={expandColumns}
+            onChange={setExpandColumns}
+            id="expand_substructures"
+          />{' '}
+          <label htmlFor="expand_substructures">Expand columns</label>
         </div>
         <textarea className={styles.query} readOnly={true} value={query} />
       </fieldset>
