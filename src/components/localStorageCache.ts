@@ -6,6 +6,8 @@ function getLocalStorageKey(url: string) {
   return `GraphQL98.schema.v2:${stringify({ url })}`;
 }
 
+const storageCallbacks = new Set<() => void>();
+
 export class LocalStorageCache implements Cache {
   key: string;
   memoryCache: any;
@@ -18,7 +20,15 @@ export class LocalStorageCache implements Cache {
         return this.memoryCache;
       }
       const value = localStorage.getItem(this.key);
-      return value ? JSON.parse(value)?.schema : null;
+      if (value) {
+        const json = JSON.parse(value);
+        const schema = json?.schema;
+        if (schema !== undefined) {
+          console.log(`Loading cached schema from ${json?.fetchedAt}`);
+          this.memoryCache = schema;
+          return schema;
+        }
+      }
     }
     // Cache is typed graphql-hooks incorrectly
     return (null as unknown) as object;
@@ -28,6 +38,10 @@ export class LocalStorageCache implements Cache {
       keyObject.operation.query === this.introspectionQuery &&
       !schema.error
     ) {
+      if (this.memoryCache?.data === schema.data) {
+        return;
+      }
+      console.log('Caching schema');
       this.memoryCache = schema;
       localStorage.setItem(
         this.key,
@@ -36,6 +50,9 @@ export class LocalStorageCache implements Cache {
           schema,
         }),
       );
+      for (const callback of storageCallbacks) {
+        callback();
+      }
     }
   }
   delete(keyObject: CacheKeyObject): void {
@@ -66,7 +83,15 @@ export function useSchemaFetchedAt(
       const fetchedAt = value ? JSON.parse(value)?.fetchedAt : undefined;
       setCacheDate(fetchedAt ? new Date(fetchedAt) : undefined);
     }
-    setValue(localStorage.getItem(getLocalStorageKey(url)));
+
+    const onStorage = () => {
+      setValue(localStorage.getItem(getLocalStorageKey(url)));
+    };
+    onStorage();
+    storageCallbacks.add(onStorage);
+    return () => {
+      storageCallbacks.delete(onStorage);
+    };
   }, [url]);
   return cacheDate;
 }

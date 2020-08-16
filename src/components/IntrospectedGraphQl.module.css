@@ -1,0 +1,12 @@
+.nav {
+  display: flex;
+  flex-direction: row;
+}
+.navLeft {
+  flex-shrink: 0;
+  flex-grow: 1;
+}
+.navRight {
+  flex-shrink: 0;
+  font-size: 0.9em;
+}
