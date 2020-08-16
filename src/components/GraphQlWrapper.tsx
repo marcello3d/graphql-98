@@ -37,7 +37,7 @@ export function GraphQlWrapper({ url }: { url: string }) {
     );
   }
 
-  if (!data || loading) {
+  if (loading) {
     return <div>Loading schema…</div>;
   }
 

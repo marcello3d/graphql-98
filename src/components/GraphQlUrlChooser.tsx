@@ -6,19 +6,9 @@ import React, {
   FormEvent,
   useCallback,
   useEffect,
-  useMemo,
   useState,
 } from 'react';
 import { StringParam, useQueryParam } from 'use-query-params';
-import { useSchemaFetchedAt } from './localStorageCache';
-
-// @ts-ignore
-const timeFormatter = new Intl.DateTimeFormat('en-US', {
-  hour: 'numeric',
-  minute: 'numeric',
-});
-// @ts-ignore
-const dateFormatter = new Intl.DateTimeFormat('en-US', { dateStyle: 'short' });
 
 export function GraphQlUrlChooser() {
   const [url, setQueryUrl] = useQueryParam('url', StringParam);
@@ -54,20 +44,6 @@ export function GraphQlUrlChooser() {
     [tempUrl, setQueryUrl],
   );
 
-  const fetchedAt = useSchemaFetchedAt(url);
-  const loadInfo = useMemo(() => {
-    if (!fetchedAt) {
-      return null;
-    }
-    const dateFormat = dateFormatter.format(fetchedAt);
-    const sameDay = dateFormat === dateFormatter.format(Date.now());
-    return (
-      <div className={styles.loadInfo}>
-        Schema cached @ {sameDay ? timeFormatter.format(fetchedAt) : dateFormat}
-      </div>
-    );
-  }, [fetchedAt]);
-
   return (
     <>
       <div className="window">
@@ -94,7 +70,6 @@ export function GraphQlUrlChooser() {
                 value={tempUrl}
                 onChange={onChangeUrl}
               />
-              {url && url === tempUrl && loadInfo}
             </div>
             <button type="submit" disabled={!tempUrl || tempUrl === url}>
               Load
