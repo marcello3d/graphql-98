@@ -60,10 +60,6 @@ export function GraphQlUrlChooser() {
         </div>
         <main className="window-body">
           <form onSubmit={loadUrl} className={styles.urlConfig}>
-            <button type="button" disabled={!url} onClick={goHome}>
-              Home
-            </button>
-            <div> </div>
             <label htmlFor="url">Endpoint URL:</label>
             <div className={styles.locationBox}>
               <input
