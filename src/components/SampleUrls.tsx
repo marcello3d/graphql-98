@@ -72,28 +72,21 @@ const sampleUrls: readonly {
 
 export function SampleUrls() {
   return (
-    <>
-      <ul className="tree-view">
-        {sampleUrls.map(({ name, url, infoUrl }, index) => (
-          <li key={index}>
-            <b>
-              <Link to={`/?${stringify({ url })}`}>
-                <EmojiIcon emoji="📊" label="GraphQL link" />
-                {name}
-              </Link>
-            </b>
-            : {url} —{' '}
-            <a href={infoUrl}>
-              <EmojiIcon emoji="ℹ️" label="info" /> info
-            </a>
-          </li>
-        ))}
-      </ul>
-
-      <div>
-        Courtesy of{' '}
-        <a href="https://github.com/APIs-guru/graphql-apis">APIs-guru</a>
-      </div>
-    </>
+    <ul className="tree-view">
+      {sampleUrls.map(({ name, url, infoUrl }, index) => (
+        <li key={index}>
+          <b>
+            <Link to={`/?${stringify({ url })}`}>
+              <EmojiIcon emoji="📊" label="GraphQL link" />
+              {name}
+            </Link>
+          </b>
+          : {url} —{' '}
+          <a href={infoUrl}>
+            <EmojiIcon emoji="ℹ️" label="info" /> info
+          </a>
+        </li>
+      ))}
+    </ul>
   );
 }

@@ -1,18 +1,19 @@
-# GraphQL ‘98 Browser
+# GraphQL ‘98: GraphQL Data Explorer
 
-GraphQL ‘98 Browser is an open source visual GraphQL data browser. Inspired by
-SQL guids like [Postico](https://eggerapps.at/postico/) and
-[Tableplus](https://tableplus.com).
+GraphQL ‘98 is a data explorer for GraphQL. Inspired by
+SQL GUIs like [phpMyAdmin](https://www.phpmyadmin.net) and
+[Tableplus](https://tableplus.com), but designed for GraphQL APIs.
 
-Start by trying the [Live demo](https://graphql-98.vercel.app)
+## [Try the app now!](https://graphql-98.vercel.app)
 
 ## Why?
 
-I've wanted to learn more about GraphQL, and one thing that I've always
-stumbled on is [GraphiQL](https://github.com/graphql/graphiql)'s
-programming-oriented approach to GraphQL.
-
-I wanted something that lets me _see_ the data without typing queries.
+I'm in the process of learning more about GraphQL.
+[GraphiQL](https://github.com/graphql/graphiql) and
+[GraphQL Playground](https://github.com/prisma-labs/graphql-playground)
+are great at providing a command-line/programming interface to GraphQL.
+But I wanted something that lets me _see_ the data without typing
+queries.
 
 ## Tech I'm using
 
@@ -22,7 +23,7 @@ None of this would be possible without open source libraries to build on top of:
   - [React](https://reactjs.org) for UI framework
   - [98.css](https://jdan.github.io/98.css/) for visual theme
   - [graphql-hooks](https://github.com/nearform/graphql-hooks) for GraphQL querying
-  - [viz.js](https://github.com/mdaines/viz.js) for rendering schema diagram
+  - [viz.js](https://github.com/mdaines/viz.js) for rendering schema diagrams
 - Environment
   - [Create React App](https://reactjs.org/docs/create-a-new-react-app.html) for webpack + eslint + bundling
   - [TypeScript](https://www.typescriptlang.org) for type checking
