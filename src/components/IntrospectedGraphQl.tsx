@@ -66,21 +66,7 @@ export function IntrospectedGraphQl({
                 {path.map((item, index) => (
                   <React.Fragment key={index}>
                     {index > 0 ? ' / ' : ''}
-                    {index === path.length - 1 ? (
-                      <b>{item}</b>
-                    ) : (
-                      <Link
-                        to={`/?${stringify({
-                          url,
-                          path:
-                            index === 0
-                              ? undefined
-                              : path.slice(0, index + 1).join('.'),
-                        })}`}
-                      >
-                        {item}
-                      </Link>
-                    )}
+                    {index === path.length - 1 ? <b>{item}</b> : item}
                   </React.Fragment>
                 ))}
               </>

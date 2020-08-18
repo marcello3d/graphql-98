@@ -1,16 +1,17 @@
 import {
   IntrospectionField,
   IntrospectionInputTypeRef,
+  IntrospectionInputValue,
   IntrospectionOutputTypeRef,
   IntrospectionSchema,
   IntrospectionType,
 } from 'graphql';
-import { IntrospectionInputValue } from 'graphql/utilities/getIntrospectionQuery';
 
 export type Restructure = {
   types: readonly RestructureType[];
   typeMap: TypeMap;
   query: RestructureQuery;
+  typeQueries: Record<string, RestructureQuery[]>;
 };
 
 type TypeMap = Record<string, RestructureType>;
@@ -38,9 +39,7 @@ export type RestructureField = {
   name: string;
   args: RestructureArg[];
   typeRef: RestructureTypeRef;
-  requiredArgs: number;
   collection: boolean;
-  showChildren: boolean;
   query: boolean;
 };
 
@@ -64,12 +63,9 @@ function argMatchesTargetType(
   );
 }
 
-function getLookupArgs(field: RestructureField): RestructureArg[] | undefined {
-  if (field.args.length === 0) {
-    return undefined;
-  }
+function getLookupArgs(field: RestructureField): RestructureArg[] {
   const targetType = field.typeRef.type;
-  const matchedArgs = field.args.filter((arg) => {
+  return field.args.filter((arg) => {
     const argFields = arg.typeRef.type.fields;
     if (argFields.length > 0) {
       return argFields.some((argField) =>
@@ -78,14 +74,6 @@ function getLookupArgs(field: RestructureField): RestructureArg[] | undefined {
     }
     return argMatchesTargetType(targetType, arg);
   });
-  if (matchedArgs.length > 0) {
-    console.log(
-      `Field ${field.name} looks like accessor for ${targetType.name}:`,
-      field,
-      matchedArgs,
-    );
-    return matchedArgs;
-  }
 }
 
 export function restructure(schema: IntrospectionSchema): Restructure {
@@ -106,6 +94,18 @@ export function restructure(schema: IntrospectionSchema): Restructure {
     .sort((a: RestructureType, b: RestructureType) =>
       a.name < b.name ? -1 : 1,
     );
+
+  const queryField: RestructureField = {
+    name: 'query',
+    typeRef: {
+      type: typeMap[schema.queryType.name],
+      array: [],
+      required: true,
+    },
+    args: [],
+    collection: false,
+    query: true,
+  };
 
   // Convert LIST/NON_NULL structure to simpler structure that counts the array dimensionality
   function mapTypeRef(raw: IntrospectionIOTypeRef): RestructureTypeRef {
@@ -138,44 +138,48 @@ export function restructure(schema: IntrospectionSchema): Restructure {
     };
   }
 
-  function mapField(field: IntrospectionField): RestructureField {
-    const args = field.args.map(mapArg);
-    const typeRef = mapTypeRef(field.type);
+  const showChildrenSet = new Set<RestructureField>([queryField]);
 
-    const requiredArgs = args.filter((arg) => arg.typeRef.required).length;
+  function mapField(raw: IntrospectionField): RestructureField {
+    const args = raw.args.map(mapArg);
+    const typeRef = mapTypeRef(raw.type);
+
+    const requiresArg = args.some((arg) => arg.typeRef.required);
     const collection = typeRef.array.length > 0;
-    const query = !collection && requiredArgs === 0;
+    const query = !collection && !requiresArg;
 
     const isObject = rawTypeMap[typeRef.type.name].kind === 'OBJECT';
-    const showChildren = isObject && !collection && requiredArgs === 0;
-    return {
-      name: field.name,
+    const field: RestructureField = {
+      name: raw.name,
       typeRef,
       args,
-      requiredArgs,
       collection,
-      showChildren,
       query,
     };
+    if (isObject && !collection && !requiresArg) {
+      showChildrenSet.add(field);
+    }
+    return field;
   }
 
-  function mapInputField(field: IntrospectionInputValue): RestructureField {
-    const typeRef = mapTypeRef(field.type);
+  function mapInputField(raw: IntrospectionInputValue): RestructureField {
+    const typeRef = mapTypeRef(raw.type);
 
     const collection = typeRef.array.length > 0;
     const query = !collection;
 
     const isObject = rawTypeMap[typeRef.type.name].kind === 'OBJECT';
-    const showChildren = isObject && !collection;
-    return {
-      name: field.name,
+    const field = {
+      name: raw.name,
       typeRef,
       args: [],
-      requiredArgs: 0,
       collection,
-      showChildren,
       query,
     };
+    if (isObject && !collection) {
+      showChildrenSet.add(field);
+    }
+    return field;
   }
 
   // Fill in fields (requires types/typeMap to be enumerated)
@@ -205,8 +209,11 @@ export function restructure(schema: IntrospectionSchema): Restructure {
       }
       const subSet = { ...seen, [type.name]: true };
       for (const field of type.fields) {
-        if (field.showChildren && checkCycles(field.typeRef.type, subSet)) {
-          field.showChildren = false;
+        if (
+          showChildrenSet.has(field) &&
+          checkCycles(field.typeRef.type, subSet)
+        ) {
+          showChildrenSet.delete(field);
         }
       }
       return false;
@@ -214,6 +221,7 @@ export function restructure(schema: IntrospectionSchema): Restructure {
     checkCycles(type, {});
   }
 
+  const typeQueries: Record<string, RestructureQuery[]> = {};
   // Build query tree
   function findQueries(
     field: RestructureField,
@@ -224,12 +232,18 @@ export function restructure(schema: IntrospectionSchema): Restructure {
       return;
     }
     path = [...path, field.name];
-    const result: RestructureQuery = { field, path };
+    const query: RestructureQuery = { field, path };
     const lookupArgs = getLookupArgs(field);
-    if (lookupArgs) {
-      result.lookupArgs = lookupArgs;
+    if (lookupArgs.length > 0) {
+      query.lookupArgs = lookupArgs;
+      const lookupTypeName = field.typeRef.type.name;
+      if (!typeQueries[lookupTypeName]) {
+        typeQueries[lookupTypeName] = [query];
+      } else {
+        typeQueries[lookupTypeName].push(query);
+      }
     }
-    if (field.showChildren) {
+    if (showChildrenSet.has(field)) {
       const children: RestructureQuery[] = [];
       for (const subField of subFields) {
         const subResult = findQueries(subField, path);
@@ -238,34 +252,16 @@ export function restructure(schema: IntrospectionSchema): Restructure {
         }
       }
       if (children.length > 0) {
-        result.children = children;
+        query.children = children;
       }
     }
-    return result;
+    return query;
   }
 
-  const query = findQueries(
-    {
-      name: 'query',
-      typeRef: {
-        type: typeMap[schema.queryType.name],
-        array: [],
-        required: true,
-      },
-      args: [],
-      requiredArgs: 0,
-      collection: false,
-      query: true,
-      showChildren: true,
-    },
-    [],
-  )!;
+  const query = findQueries(queryField, [])!;
 
-  const result: Restructure = {
-    types: types,
-    typeMap,
-    query,
-  };
+  const result: Restructure = { types, typeMap, query, typeQueries };
+
   console.log(`Processed schema:`, result);
   return result;
 }

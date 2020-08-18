@@ -2,7 +2,11 @@ import React, { useMemo } from 'react';
 
 import styles from './GraphQlTypeView.module.css';
 
-import { Restructure } from '../lib/restructure';
+import {
+  Restructure,
+  RestructureQuery,
+  RestructureType,
+} from '../lib/restructure';
 import { useQuery } from 'graphql-hooks';
 import { Table } from './Table';
 import { GraphQlError } from './GraphQlError';
@@ -60,9 +64,11 @@ function cellValue(value: any): React.ReactNode {
 function getColumns(
   fields: QueryField[],
   expandColumns: boolean,
+  typeQueries: Record<string, RestructureQuery[]>,
+  fieldType: RestructureType,
   path: string[] = [],
 ): Column[] {
-  return fields
+  const columns = fields
     .filter(({ disabled = false }) => !disabled)
     .map(({ name, typeRef, children }) => {
       const newPath = [...path, name];
@@ -76,7 +82,13 @@ function getColumns(
         return {
           id: fullPath,
           Header,
-          columns: getColumns(children, expandColumns, newPath),
+          columns: getColumns(
+            children,
+            expandColumns,
+            typeQueries,
+            typeRef.type,
+            newPath,
+          ),
         };
       } else {
         return {
@@ -86,6 +98,20 @@ function getColumns(
         };
       }
     });
+  if (typeQueries[fieldType.name]) {
+    return [
+      ...typeQueries[fieldType.name].map(({ field, lookupArgs, path }) => {
+        const fullPath = path.join('.');
+        return {
+          id: fullPath,
+          Header: '🔗',
+          accessor: fullPath,
+        };
+      }),
+      ...columns,
+    ];
+  }
+  return columns;
 }
 
 export function GraphQlTypeView({
@@ -103,13 +129,12 @@ export function GraphQlTypeView({
     path,
     substructures,
   );
-  console.log('queryGraph', queryGraph);
 
   const query = renderQuery(queryGraph);
   const { error, data } = useQuery(query, {});
-  console.log('Raw data', data);
   let rows: object[] | undefined = undefined;
   if (data) {
+    console.log('Raw data', data);
     let walkData = data;
     for (let i = 1; i < path.length; i++) {
       walkData = walkData?.[path[i]];
@@ -118,10 +143,16 @@ export function GraphQlTypeView({
       rows = walkData;
     }
   }
-  const columns = useMemo(() => getColumns(fields, expandColumns), [
-    expandColumns,
-    fields,
-  ]);
+  const columns = useMemo(
+    () =>
+      getColumns(
+        fields,
+        expandColumns,
+        structure.typeQueries,
+        field.typeRef.type,
+      ),
+    [expandColumns, field.typeRef.type, fields, structure.typeQueries],
+  );
   return (
     <>
       <fieldset>

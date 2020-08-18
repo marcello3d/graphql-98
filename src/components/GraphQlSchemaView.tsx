@@ -40,7 +40,7 @@ function NodeIcon({ field }: { field: RestructureField }) {
   if (field.collection) {
     return <EmojiIcon emoji="🛄" label="collection" />;
   }
-  if (field.requiredArgs > 0) {
+  if (field.args.length > 0) {
     return <EmojiIcon emoji="✴️" label="function" />;
   }
   if (field.typeRef.type.fields.length > 0) {
