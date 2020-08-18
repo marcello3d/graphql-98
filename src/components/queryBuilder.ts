@@ -17,7 +17,7 @@ export function buildQueryGraph(
   queryGraph: QueryField;
   fields: QueryField[];
 } {
-  let field: RestructureField = structure.queryField;
+  let field: RestructureField = structure.query.field;
   let children: QueryField[] = [];
 
   const queryGraph: QueryField = {

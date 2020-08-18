@@ -3,7 +3,7 @@ import React from 'react';
 import {
   Restructure,
   RestructureField,
-  RestructureLookup,
+  RestructureQuery,
 } from '../lib/restructure';
 import { Link } from '@reach/router';
 import { stringify } from 'query-string';
@@ -26,8 +26,8 @@ export function GraphQlSchemaView({
         <li>
           <EmojiIcon emoji="🗃" label="root" /> {url}
           <ul>
-            <NodeItem field={structure.queryField} url={url} />
-            <LookupList structure={structure} />
+            <NodeItem query={structure.query} url={url} />
+            {/*<LookupList structure={structure} />*/}
           </ul>
         </li>
       </ul>
@@ -51,80 +51,26 @@ function NodeIcon({ field }: { field: RestructureField }) {
 
 function NodeItem({
   url,
-  field,
-  path = [field.name],
+  query: { field, path, lookupArgs, children },
 }: {
   url: string;
-  field: RestructureField;
-  path?: string[];
+  query: RestructureQuery;
 }) {
-  const subFields = field.typeRef.type.fields;
-  if (subFields.length === 0 || path.length > 10) {
-    return null;
-  }
   return (
     <li>
       <Link to={`/?${stringify({ url, path: path.join('.') })}`}>
+        {lookupArgs && <EmojiIcon emoji="🆔️" label="function" />}
         <NodeIcon field={field} /> <b>{field.name}</b>
       </Link>
       {field.args.length > 0 && <>({field.args.map(formatArg).join(', ')})</>}:{' '}
       {formatType(field.typeRef)}
-      {field.showChildren && (
+      {children && (
         <ul>
-          {subFields.map((subField) => (
-            <NodeItem
-              key={subField.name}
-              field={subField}
-              url={url}
-              path={[...path, subField.name]}
-            />
+          {children.map((subQuery) => (
+            <NodeItem key={subQuery.field.name} query={subQuery} url={url} />
           ))}
         </ul>
       )}
     </li>
-  );
-}
-
-function LookupList({ structure }: { structure: Restructure }) {
-  const typeQueryTypes = Object.keys(structure.typeQueries);
-  if (!typeQueryTypes.length) {
-    return null;
-  }
-  return (
-    <li>
-      Lookup query functions by type
-      <ul>
-        {typeQueryTypes.map((type) => (
-          <li>
-            <EmojiIcon emoji="✴️" label="function" />
-            <b>{type}</b> via
-            {structure.typeQueries[type].length === 1 ? (
-              <LookupFn lookup={structure.typeQueries[type][0]} />
-            ) : (
-              <ul>
-                {structure.typeQueries[type].map((lookup) => (
-                  <li key={lookup.queryField.name}>
-                    <LookupFn lookup={lookup} />
-                  </li>
-                ))}
-              </ul>
-            )}
-          </li>
-        ))}
-      </ul>
-    </li>
-  );
-}
-
-function LookupFn({
-  lookup: { path, queryField, matchedArgs },
-}: {
-  lookup: RestructureLookup;
-}) {
-  return (
-    <>
-      {path.join('.')} <b>{queryField.name}</b>(
-      {matchedArgs.map(formatArg).join(', ')})
-    </>
   );
 }

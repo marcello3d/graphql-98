@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { IntrospectionSchema } from 'graphql';
 
 import styles from './IntrospectedGraphQl.module.css';
@@ -28,13 +28,9 @@ export function IntrospectedGraphQl({
   reloadSchema: () => void;
   schema: IntrospectionSchema;
 }) {
-  const [queryPath, setQueryPath] = useQueryParam('path', StringParam);
+  const [queryPath] = useQueryParam('path', StringParam);
 
   const structure = useMemo(() => restructure(schema), [schema]);
-
-  const goRoot = useCallback(() => {
-    setQueryPath(undefined);
-  }, [setQueryPath]);
 
   const path = useMemo(() => (queryPath ? queryPath.split('.') : []), [
     queryPath,
@@ -59,7 +55,11 @@ export function IntrospectedGraphQl({
         <legend>Navigation</legend>
         <div className={styles.nav}>
           <div className={styles.navLeft}>
-            <button onClick={goRoot}>Overview</button>
+            {path.length === 0 ? (
+              <b>Overview</b>
+            ) : (
+              <Link to={`/?${stringify({ url })}`}>Overview</Link>
+            )}
             {path.length > 0 && (
               <>
                 {' : '}
