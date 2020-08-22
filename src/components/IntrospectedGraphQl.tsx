@@ -9,7 +9,7 @@ import { GraphQlTypeView } from './GraphQlTypeView';
 import { GraphQlSchemaView } from './GraphQlSchemaView';
 import { stringify } from 'query-string';
 import { Link } from '@reach/router';
-import { useSchemaFetchedAt } from './localStorageCache';
+import { useSchemaFetchedAt } from '../hooks/localStorageCache';
 
 // @ts-ignore
 const timeFormatter = new Intl.DateTimeFormat('en-US', {

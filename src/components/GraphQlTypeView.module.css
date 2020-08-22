@@ -5,6 +5,8 @@
 .url,
 .text,
 .json,
+.react,
+.link,
 .true,
 .false,
 .null,
@@ -46,6 +48,13 @@
 .json {
   color: #075855;
   line-break: auto;
+}
+.link {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .text {

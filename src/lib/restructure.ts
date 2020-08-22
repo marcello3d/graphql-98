@@ -11,7 +11,7 @@ export type Restructure = {
   types: readonly RestructureType[];
   typeMap: TypeMap;
   query: RestructureQuery;
-  typeQueries: Record<string, RestructureQuery[]>;
+  typeQueries: Record<string, RestructureLookupQuery[]>;
 };
 
 type TypeMap = Record<string, RestructureType>;
@@ -38,6 +38,7 @@ export type RestructureArg = {
 export type RestructureField = {
   name: string;
   args: RestructureArg[];
+  argMap: Record<string, RestructureArg>;
   typeRef: RestructureTypeRef;
   collection: boolean;
   query: boolean;
@@ -46,8 +47,12 @@ export type RestructureField = {
 export type RestructureQuery = {
   field: RestructureField;
   path: readonly string[];
+  lookupArg?: RestructureArg;
   lookupArgs?: RestructureArg[];
   children?: RestructureQuery[];
+};
+export type RestructureLookupQuery = RestructureQuery & {
+  lookupArgs: RestructureArg[];
 };
 
 function argMatchesTargetType(
@@ -103,6 +108,7 @@ export function restructure(schema: IntrospectionSchema): Restructure {
       required: true,
     },
     args: [],
+    argMap: {},
     collection: false,
     query: true,
   };
@@ -141,7 +147,12 @@ export function restructure(schema: IntrospectionSchema): Restructure {
   const showChildrenSet = new Set<RestructureField>([queryField]);
 
   function mapField(raw: IntrospectionField): RestructureField {
-    const args = raw.args.map(mapArg);
+    const argMap: Record<string, RestructureArg> = {};
+    const args = raw.args.map((arg) => {
+      const restructureArg = mapArg(arg);
+      argMap[arg.name] = restructureArg;
+      return restructureArg;
+    });
     const typeRef = mapTypeRef(raw.type);
 
     const requiresArg = args.some((arg) => arg.typeRef.required);
@@ -153,6 +164,7 @@ export function restructure(schema: IntrospectionSchema): Restructure {
       name: raw.name,
       typeRef,
       args,
+      argMap,
       collection,
       query,
     };
@@ -173,6 +185,7 @@ export function restructure(schema: IntrospectionSchema): Restructure {
       name: raw.name,
       typeRef,
       args: [],
+      argMap: {},
       collection,
       query,
     };
@@ -221,7 +234,7 @@ export function restructure(schema: IntrospectionSchema): Restructure {
     checkCycles(type, {});
   }
 
-  const typeQueries: Record<string, RestructureQuery[]> = {};
+  const typeQueries: Record<string, RestructureLookupQuery[]> = {};
   // Build query tree
   function findQueries(
     field: RestructureField,
@@ -236,11 +249,19 @@ export function restructure(schema: IntrospectionSchema): Restructure {
     const lookupArgs = getLookupArgs(field);
     if (lookupArgs.length > 0) {
       query.lookupArgs = lookupArgs;
+      query.lookupArg = lookupArgs.find((arg) => {
+        return (
+          arg.name === 'id' ||
+          arg.name === '_id' ||
+          arg.typeRef.type.name.toUpperCase() === 'ID'
+        );
+      });
+      const lookupQuery = query as RestructureLookupQuery;
       const lookupTypeName = field.typeRef.type.name;
       if (!typeQueries[lookupTypeName]) {
-        typeQueries[lookupTypeName] = [query];
+        typeQueries[lookupTypeName] = [lookupQuery];
       } else {
-        typeQueries[lookupTypeName].push(query);
+        typeQueries[lookupTypeName].push(lookupQuery);
       }
     }
     if (showChildrenSet.has(field)) {
@@ -265,3 +286,5 @@ export function restructure(schema: IntrospectionSchema): Restructure {
   console.log(`Processed schema:`, result);
   return result;
 }
+
+export type Variables = Record<string, any>;

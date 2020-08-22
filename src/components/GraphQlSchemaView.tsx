@@ -8,7 +8,7 @@ import {
 import { Link } from '@reach/router';
 import { stringify } from 'query-string';
 import { GraphvizGraph } from './GraphvizGraph';
-import { computeGraph } from './schemaToGraphviz';
+import { computeGraph } from '../lib/schemaToGraphviz';
 import { EmojiIcon } from './EmojiIcon';
 import { formatArg, formatType } from '../lib/restructureFormatters';
 
