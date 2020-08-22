@@ -91,7 +91,7 @@ function getColumns(
                   args: JSON.stringify(args),
                 })}`}
               >
-                <EmojiIcon emoji="🔗" label="Link to row" />
+                #
               </Link>
             );
           },
