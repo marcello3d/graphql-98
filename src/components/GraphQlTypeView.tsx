@@ -4,9 +4,8 @@ import styles from './GraphQlTypeView.module.css';
 
 import {
   Restructure,
-  RestructureLookupQuery,
-  RestructureQuery,
   RestructureType,
+  RestructureTypeLookup,
   Variables,
 } from '../lib/restructure';
 import { useQuery } from 'graphql-hooks';
@@ -17,16 +16,15 @@ import { Column } from 'react-table';
 import { formatType } from '../lib/restructureFormatters';
 import { useBooleanQuery } from '../hooks/useBooleanQuery';
 import { GraphQlValue } from './GraphQlValue';
-import { useQueryParam, JsonParam } from 'use-query-params';
+import { JsonParam, useQueryParam } from 'use-query-params';
 import { stringify } from 'query-string';
 import { Link } from '@reach/router';
-import { EmojiIcon } from './EmojiIcon';
 
 function getColumns(
   url: string,
   fields: QueryNode[],
   expandColumns: boolean,
-  typeQueries: Record<string, RestructureLookupQuery[]>,
+  typeQueries: Record<string, RestructureTypeLookup>,
   fieldType: RestructureType,
   fieldPath: string[] = [],
 ): Column[] {
@@ -61,42 +59,45 @@ function getColumns(
         };
       }
     });
-  if (typeQueries[fieldType.name]) {
+  const lookups = typeQueries[fieldType.name];
+  if (lookups) {
     return [
-      ...typeQueries[fieldType.name].map(({ lookupArg, lookupArgs, path }) => {
-        const fullPath = path.join('.');
-        return {
-          id: fullPath,
-          Header: `🔗`,
-          accessor: (row: any) => {
-            const args: Variables = {};
-            for (const fieldPathName of fieldPath) {
-              row = row?.[fieldPathName];
-            }
-            if (lookupArg && row[lookupArg.name]) {
-              args[lookupArg.name] = row[lookupArg.name];
-            } else {
-              for (const arg of lookupArgs) {
-                if (row[arg.name]) {
-                  args[arg.name] = row[arg.name];
+      ...(lookups.single.length > 0 ? lookups.single : lookups.collection).map(
+        ({ lookupArg, lookupArgs, path }) => {
+          const fullPath = path.join('.');
+          return {
+            id: fullPath,
+            Header: `🔗`,
+            accessor: (row: any) => {
+              const args: Variables = {};
+              for (const fieldPathName of fieldPath) {
+                row = row?.[fieldPathName];
+              }
+              if (lookupArg && row[lookupArg.name]) {
+                args[lookupArg.name] = row[lookupArg.name];
+              } else {
+                for (const arg of lookupArgs) {
+                  if (row[arg.name]) {
+                    args[arg.name] = row[arg.name];
+                  }
                 }
               }
-            }
-            return (
-              <Link
-                className={styles.link}
-                to={`/?${stringify({
-                  url,
-                  path: fullPath,
-                  args: JSON.stringify(args),
-                })}`}
-              >
-                #
-              </Link>
-            );
-          },
-        };
-      }),
+              return (
+                <Link
+                  className={styles.lookupLink}
+                  to={`/?${stringify({
+                    url,
+                    path: fullPath,
+                    args: JSON.stringify(args),
+                  })}`}
+                >
+                  #
+                </Link>
+              );
+            },
+          };
+        },
+      ),
       ...columns,
     ];
   }

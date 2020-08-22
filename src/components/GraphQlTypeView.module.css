@@ -19,6 +19,7 @@
   align-items: center;
   width: 100%;
   min-height: 28px;
+  box-sizing: border-box;
 }
 .overflow {
   display: -webkit-box;
@@ -30,7 +31,7 @@
 }
 .true {
   font-weight: bold;
-  color: #0066ff;
+  color: #00a4a4;
 }
 .false {
   font-style: italic;
@@ -42,19 +43,22 @@
   color: #888;
 }
 .number {
-  color: blue;
-  text-align: right;
+  color: #6c00d4;
+  justify-content: flex-end;
 }
 .json {
   color: #075855;
   line-break: auto;
 }
-.link {
+.lookupLink {
   width: 100%;
   height: 100%;
   display: flex;
   justify-content: center;
   box-sizing: border-box;
+}
+.url a {
+  color: #414fe9;
 }
 
 .text {

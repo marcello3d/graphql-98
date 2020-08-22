@@ -11,7 +11,7 @@ export type Restructure = {
   types: readonly RestructureType[];
   typeMap: TypeMap;
   query: RestructureQuery;
-  typeQueries: Record<string, RestructureLookupQuery[]>;
+  typeQueries: Record<string, RestructureTypeLookup>;
 };
 
 type TypeMap = Record<string, RestructureType>;
@@ -80,6 +80,11 @@ function getLookupArgs(field: RestructureField): RestructureArg[] {
     return argMatchesTargetType(targetType, arg);
   });
 }
+
+export type RestructureTypeLookup = {
+  single: RestructureLookupQuery[];
+  collection: RestructureLookupQuery[];
+};
 
 export function restructure(schema: IntrospectionSchema): Restructure {
   console.log(`Processing schema…`);
@@ -234,7 +239,7 @@ export function restructure(schema: IntrospectionSchema): Restructure {
     checkCycles(type, {});
   }
 
-  const typeQueries: Record<string, RestructureLookupQuery[]> = {};
+  const typeQueries: Record<string, RestructureTypeLookup> = {};
   // Build query tree
   function findQueries(
     field: RestructureField,
@@ -258,10 +263,17 @@ export function restructure(schema: IntrospectionSchema): Restructure {
       });
       const lookupQuery = query as RestructureLookupQuery;
       const lookupTypeName = field.typeRef.type.name;
-      if (!typeQueries[lookupTypeName]) {
-        typeQueries[lookupTypeName] = [lookupQuery];
+      let typedQueries = typeQueries[lookupTypeName];
+      if (!typedQueries) {
+        typedQueries = typeQueries[lookupTypeName] = {
+          single: [],
+          collection: [],
+        };
+      }
+      if (lookupQuery.field.collection) {
+        typedQueries.collection.push(lookupQuery);
       } else {
-        typeQueries[lookupTypeName].push(lookupQuery);
+        typedQueries.single.push(lookupQuery);
       }
     }
     if (showChildrenSet.has(field)) {
