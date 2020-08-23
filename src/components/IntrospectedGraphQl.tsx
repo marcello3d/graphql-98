@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { IntrospectionSchema } from 'graphql';
 
 import styles from './IntrospectedGraphQl.module.css';
@@ -9,7 +9,7 @@ import { GraphQlTypeView } from './GraphQlTypeView';
 import { GraphQlSchemaView } from './GraphQlSchemaView';
 import { stringify } from 'query-string';
 import { Link } from '@reach/router';
-import { useSchemaFetchedAt } from './localStorageCache';
+import { useSchemaFetchedAt } from '../hooks/localStorageCache';
 
 // @ts-ignore
 const timeFormatter = new Intl.DateTimeFormat('en-US', {
@@ -28,13 +28,9 @@ export function IntrospectedGraphQl({
   reloadSchema: () => void;
   schema: IntrospectionSchema;
 }) {
-  const [queryPath, setQueryPath] = useQueryParam('path', StringParam);
+  const [queryPath] = useQueryParam('path', StringParam);
 
   const structure = useMemo(() => restructure(schema), [schema]);
-
-  const goRoot = useCallback(() => {
-    setQueryPath(undefined);
-  }, [setQueryPath]);
 
   const path = useMemo(() => (queryPath ? queryPath.split('.') : []), [
     queryPath,
@@ -59,28 +55,18 @@ export function IntrospectedGraphQl({
         <legend>Navigation</legend>
         <div className={styles.nav}>
           <div className={styles.navLeft}>
-            <button onClick={goRoot}>Overview</button>
+            {path.length === 0 ? (
+              <b>Overview</b>
+            ) : (
+              <Link to={`/?${stringify({ url })}`}>Overview</Link>
+            )}
             {path.length > 0 && (
               <>
                 {' : '}
                 {path.map((item, index) => (
                   <React.Fragment key={index}>
                     {index > 0 ? ' / ' : ''}
-                    {index === path.length - 1 ? (
-                      <b>{item}</b>
-                    ) : (
-                      <Link
-                        to={`/?${stringify({
-                          url,
-                          path:
-                            index === 0
-                              ? undefined
-                              : path.slice(0, index + 1).join('.'),
-                        })}`}
-                      >
-                        {item}
-                      </Link>
-                    )}
+                    {index === path.length - 1 ? <b>{item}</b> : item}
                   </React.Fragment>
                 ))}
               </>

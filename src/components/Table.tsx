@@ -6,11 +6,11 @@ import styles from './Table.module.css';
 export const Table = React.memo(function TableInner({
   columns,
   data,
-  renderCell,
+  ValueComponent,
 }: {
   columns: Column[];
   data?: object[];
-  renderCell: (value: any) => React.ReactNode;
+  ValueComponent: React.FunctionComponent<{ value: any }>;
 }) {
   const {
     getTableProps,
@@ -64,6 +64,7 @@ export const Table = React.memo(function TableInner({
                   row === columnDepth - 1 ? depth - columnDepth : 0;
                 return (
                   <th
+                    key={col}
                     className={
                       typeof group.Header === 'function'
                         ? styles.emptyColumn
@@ -93,13 +94,11 @@ export const Table = React.memo(function TableInner({
               prepareRow(row);
               return (
                 <tr {...row.getRowProps()}>
-                  {row.cells.map((cell, i) => {
-                    return (
-                      <td className={styles.cell} {...cell.getCellProps()}>
-                        {renderCell(cell.value)}
-                      </td>
-                    );
-                  })}
+                  {row.cells.map((cell, i) => (
+                    <td className={styles.cell} {...cell.getCellProps()}>
+                      <ValueComponent value={cell.value} />
+                    </td>
+                  ))}
                 </tr>
               );
             })

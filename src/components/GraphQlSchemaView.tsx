@@ -1,10 +1,14 @@
 import React from 'react';
 
-import { Restructure, RestructureField } from '../lib/restructure';
+import {
+  Restructure,
+  RestructureField,
+  RestructureQuery,
+} from '../lib/restructure';
 import { Link } from '@reach/router';
 import { stringify } from 'query-string';
 import { GraphvizGraph } from './GraphvizGraph';
-import { computeGraph } from './schemaToGraphviz';
+import { computeGraph } from '../lib/schemaToGraphviz';
 import { EmojiIcon } from './EmojiIcon';
 import { formatArg, formatType } from '../lib/restructureFormatters';
 
@@ -22,7 +26,8 @@ export function GraphQlSchemaView({
         <li>
           <EmojiIcon emoji="🗃" label="root" /> {url}
           <ul>
-            <NodeItem field={structure.queryField} url={url} />
+            <NodeItem query={structure.query} url={url} />
+            {/*<LookupList structure={structure} />*/}
           </ul>
         </li>
       </ul>
@@ -35,7 +40,7 @@ function NodeIcon({ field }: { field: RestructureField }) {
   if (field.collection) {
     return <EmojiIcon emoji="🛄" label="collection" />;
   }
-  if (field.requiredArgs > 0) {
+  if (field.args.length > 0) {
     return <EmojiIcon emoji="✴️" label="function" />;
   }
   if (field.typeRef.type.fields.length > 0) {
@@ -46,33 +51,23 @@ function NodeIcon({ field }: { field: RestructureField }) {
 
 function NodeItem({
   url,
-  field,
-  path = [field.name],
+  query: { field, path, lookupArgs, children },
 }: {
   url: string;
-  field: RestructureField;
-  path?: string[];
+  query: RestructureQuery;
 }) {
-  const subFields = field.typeRef.type.fields;
-  if (subFields.length === 0 || path.length > 10) {
-    return null;
-  }
   return (
     <li>
       <Link to={`/?${stringify({ url, path: path.join('.') })}`}>
+        {lookupArgs && <EmojiIcon emoji="🆔️" label="function" />}
         <NodeIcon field={field} /> <b>{field.name}</b>
       </Link>
       {field.args.length > 0 && <>({field.args.map(formatArg).join(', ')})</>}:{' '}
       {formatType(field.typeRef)}
-      {field.showChildren && (
+      {children && (
         <ul>
-          {subFields.map((subField) => (
-            <NodeItem
-              key={subField.name}
-              field={subField}
-              url={url}
-              path={[...path, subField.name]}
-            />
+          {children.map((subQuery) => (
+            <NodeItem key={subQuery.field.name} query={subQuery} url={url} />
           ))}
         </ul>
       )}

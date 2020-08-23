@@ -2,81 +2,55 @@ import React, { useMemo } from 'react';
 
 import styles from './GraphQlTypeView.module.css';
 
-import { Restructure } from '../lib/restructure';
+import {
+  Restructure,
+  RestructureArg,
+  RestructureType,
+  RestructureTypeLookup,
+  Variables,
+} from '../lib/restructure';
 import { useQuery } from 'graphql-hooks';
 import { Table } from './Table';
 import { GraphQlError } from './GraphQlError';
-import { buildQueryGraph, QueryField, renderQuery } from './queryBuilder';
+import { buildQueryGraph, QueryNode, renderQuery } from '../lib/queryBuilder';
 import { Column } from 'react-table';
 import { formatType } from '../lib/restructureFormatters';
 import { useBooleanQuery } from '../hooks/useBooleanQuery';
-
-function cellValue(value: any): React.ReactNode {
-  if (value === true) {
-    return <div className={styles.true}>true</div>;
-  }
-  if (value === false) {
-    return <div className={styles.false}>false</div>;
-  }
-  if (value === null) {
-    return <div className={styles.null}>NULL</div>;
-  }
-  if (value === undefined) {
-    return <div className={styles.null}>NO VALUE</div>;
-  }
-  if (value === '') {
-    return <div className={styles.empty}>EMPTY</div>;
-  }
-  if (typeof value === 'number') {
-    return <div className={styles.number}>{value}</div>;
-  }
-  if (typeof value === 'string') {
-    if (/^\s*(http|https):\/\//.test(value)) {
-      return (
-        <div className={styles.url}>
-          <div className={styles.overflow}>
-            <a href={value} rel="nofollow noreferrer noopener" target="_blank">
-              {value}
-            </a>
-          </div>
-        </div>
-      );
-    }
-    return (
-      <div className={styles.text}>
-        <div className={styles.overflow}>{value}</div>
-      </div>
-    );
-  }
-  return (
-    <div className={styles.json}>
-      <div className={styles.overflow}>
-        {JSON.stringify(value).replace(/([{,])"(.*?)":/g, '$1 $2: ')}
-      </div>
-    </div>
-  );
-}
+import { GraphQlValue } from './GraphQlValue';
+import { JsonParam, useQueryParam } from 'use-query-params';
+import { stringify } from 'query-string';
+import { Link } from '@reach/router';
 
 function getColumns(
-  fields: QueryField[],
+  url: string,
+  fields: QueryNode[],
   expandColumns: boolean,
-  path: string[] = [],
+  typeQueries: Record<string, RestructureTypeLookup>,
+  fieldType: RestructureType,
+  fieldPath: string[] = [],
 ): Column[] {
-  return fields
+  const columns = fields
     .filter(({ disabled = false }) => !disabled)
     .map(({ name, typeRef, children }) => {
-      const newPath = [...path, name];
+      const newFieldPath = [...fieldPath, name];
       const Header = (
         <>
           {name}: <b>{formatType(typeRef)}</b>
         </>
       );
-      const fullPath = newPath.join('.');
+      const fullPath = newFieldPath.join('.');
       if (children && children.length > 0 && expandColumns) {
         return {
           id: fullPath,
           Header,
-          columns: getColumns(children, expandColumns, newPath),
+          columns: getColumns(
+            url,
+            children,
+            expandColumns,
+            typeQueries,
+            typeRef.type,
+            newFieldPath,
+          ),
         };
       } else {
         return {
@@ -86,9 +60,68 @@ function getColumns(
         };
       }
     });
+  const lookups = typeQueries[fieldType.name];
+  if (lookups) {
+    return [
+      ...(lookups.single.length > 0 ? lookups.single : lookups.collection).map(
+        ({ lookupArg, lookupArgs, path }) => {
+          const fullPath = path.join('.');
+          return {
+            id: fullPath,
+            Header: `🔗`,
+            accessor: (row: any) => {
+              const args: Variables = {};
+              for (const fieldPathName of fieldPath) {
+                row = row?.[fieldPathName];
+              }
+              function addArg(arg: RestructureArg) {
+                const argFields = arg.typeRef.type.fields;
+                if (argFields.length > 0) {
+                  const obj: Variables = {};
+                  for (const argField of argFields) {
+                    if (argField.name in row) {
+                      obj[argField.name] = row[argField.name];
+                    }
+                  }
+                  if (Object.keys(obj)) {
+                    args[arg.name] = obj;
+                    return true;
+                  }
+                } else {
+                  if (arg.name in row) {
+                    args[arg.name] = row[arg.name];
+                    return true;
+                  }
+                }
+                return false;
+              }
+              if (!lookupArg || !addArg(lookupArg)) {
+                lookupArgs.forEach(addArg);
+              }
+              return (
+                <Link
+                  className={styles.lookupLink}
+                  to={`/?${stringify({
+                    url,
+                    path: fullPath,
+                    args: JSON.stringify(args),
+                  })}`}
+                >
+                  #
+                </Link>
+              );
+            },
+          };
+        },
+      ),
+      ...columns,
+    ];
+  }
+  return columns;
 }
 
 export function GraphQlTypeView({
+  url,
   structure,
   path,
 }: {
@@ -96,20 +129,21 @@ export function GraphQlTypeView({
   structure: Restructure;
   path: string[];
 }) {
+  const [args] = useQueryParam('args', JsonParam);
   const [substructures, setSubstructures] = useBooleanQuery('ss');
   const [expandColumns, setExpandColumns] = useBooleanQuery('ec');
-  const { queryGraph, field, fields } = buildQueryGraph(
+  const { rootNode, firstNode, variables } = buildQueryGraph(
     structure,
     path,
     substructures,
+    args,
   );
-  console.log('queryGraph', queryGraph);
 
-  const query = renderQuery(queryGraph);
-  const { error, data } = useQuery(query, {});
-  console.log('Raw data', data);
+  const query = renderQuery(rootNode);
+  const { error, data } = useQuery(query, { variables });
   let rows: object[] | undefined = undefined;
   if (data) {
+    console.log('Raw data', data);
     let walkData = data;
     for (let i = 1; i < path.length; i++) {
       walkData = walkData?.[path[i]];
@@ -118,10 +152,23 @@ export function GraphQlTypeView({
       rows = walkData;
     }
   }
-  const columns = useMemo(() => getColumns(fields, expandColumns), [
-    expandColumns,
-    fields,
-  ]);
+  const columns = useMemo(
+    () =>
+      getColumns(
+        url,
+        firstNode.children,
+        expandColumns,
+        structure.typeQueries,
+        firstNode.typeRef.type,
+      ),
+    [
+      url,
+      expandColumns,
+      firstNode.children,
+      firstNode.typeRef.type,
+      structure.typeQueries,
+    ],
+  );
   return (
     <>
       <fieldset>
@@ -144,12 +191,21 @@ export function GraphQlTypeView({
           />{' '}
           <label htmlFor="expand_substructures">Expand columns</label>
         </div>
-        <textarea className={styles.query} readOnly={true} value={query} />
+        <div className={styles.inputs}>
+          <textarea className={styles.query} readOnly={true} value={query} />
+          {variables && (
+            <textarea
+              className={styles.query}
+              readOnly={true}
+              value={JSON.stringify(variables, undefined, 2)}
+            />
+          )}
+        </div>
       </fieldset>
       {error ? (
         <GraphQlError title="Query error" error={error} />
-      ) : field.collection ? (
-        <Table columns={columns} data={rows} renderCell={cellValue} />
+      ) : firstNode.collection ? (
+        <Table columns={columns} data={rows} ValueComponent={GraphQlValue} />
       ) : (
         <Tree data={data} />
       )}
@@ -173,7 +229,7 @@ function Tree({ data }: { data: any }) {
         </>
       );
     }
-    return cellValue(data);
+    return <GraphQlValue value={data} />;
   }
   return (
     <ul className="tree-view">

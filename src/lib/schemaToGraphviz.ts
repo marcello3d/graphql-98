@@ -1,5 +1,5 @@
-import { Restructure, RestructureType } from '../lib/restructure';
-import { formatType } from '../lib/restructureFormatters';
+import { Restructure, RestructureType } from './restructure';
+import { formatType } from './restructureFormatters';
 
 function showType({ name, fields }: RestructureType) {
   return fields.length > 0 && !/^_/.test(name);

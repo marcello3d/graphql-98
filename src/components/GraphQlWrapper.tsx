@@ -4,7 +4,7 @@ import { ClientContext, GraphQLClient, useQuery } from 'graphql-hooks';
 import { getIntrospectionQuery, IntrospectionQuery } from 'graphql';
 import { IntrospectedGraphQl } from './IntrospectedGraphQl';
 import { GraphQlError } from './GraphQlError';
-import { LocalStorageCache } from './localStorageCache';
+import { LocalStorageCache } from '../hooks/localStorageCache';
 
 // Some graphql servers fail if you try to request the 'locations'
 // field on directives (we're not using directives anyway)
