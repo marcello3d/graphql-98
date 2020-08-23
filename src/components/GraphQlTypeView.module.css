@@ -69,6 +69,11 @@
   vertical-align: center;
 }
 
+.inputs {
+  display: flex;
+  grid-template-columns: minmax(50%, 1fr) minmax(50%, 1fr);
+  grid-gap: 8px;
+}
 .query {
   font-family: monospace;
   width: 100%;

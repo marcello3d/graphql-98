@@ -191,7 +191,16 @@ export function GraphQlTypeView({
           />{' '}
           <label htmlFor="expand_substructures">Expand columns</label>
         </div>
-        <textarea className={styles.query} readOnly={true} value={query} />
+        <div className={styles.inputs}>
+          <textarea className={styles.query} readOnly={true} value={query} />
+          {variables && (
+            <textarea
+              className={styles.query}
+              readOnly={true}
+              value={JSON.stringify(variables, undefined, 2)}
+            />
+          )}
+        </div>
       </fieldset>
       {error ? (
         <GraphQlError title="Query error" error={error} />
