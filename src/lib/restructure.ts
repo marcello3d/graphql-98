@@ -71,13 +71,12 @@ function argMatchesTargetType(
 function getLookupArgs(field: RestructureField): RestructureArg[] {
   const targetType = field.typeRef.type;
   return field.args.filter((arg) => {
-    const argFields = arg.typeRef.type.fields;
-    if (argFields.length > 0) {
-      return argFields.some((argField) =>
+    return (
+      argMatchesTargetType(targetType, arg) ||
+      arg.typeRef.type.fields.some((argField) =>
         argMatchesTargetType(targetType, argField),
-      );
-    }
-    return argMatchesTargetType(targetType, arg);
+      )
+    );
   });
 }
 
@@ -85,6 +84,15 @@ export type RestructureTypeLookup = {
   single: RestructureLookupQuery[];
   collection: RestructureLookupQuery[];
 };
+
+function isIdArg(arg: RestructureArg) {
+  return (
+    arg.name === 'id' ||
+    arg.name === '_id' ||
+    arg.typeRef.type.name.toUpperCase() === 'ID' ||
+    arg.typeRef.type.fields.some(isIdArg)
+  );
+}
 
 export function restructure(schema: IntrospectionSchema): Restructure {
   console.log(`Processing schema…`);
@@ -254,13 +262,7 @@ export function restructure(schema: IntrospectionSchema): Restructure {
     const lookupArgs = getLookupArgs(field);
     if (lookupArgs.length > 0) {
       query.lookupArgs = lookupArgs;
-      query.lookupArg = lookupArgs.find((arg) => {
-        return (
-          arg.name === 'id' ||
-          arg.name === '_id' ||
-          arg.typeRef.type.name.toUpperCase() === 'ID'
-        );
-      });
+      query.lookupArg = lookupArgs.find(isIdArg);
       const lookupQuery = query as RestructureLookupQuery;
       const lookupTypeName = field.typeRef.type.name;
       let typedQueries = typeQueries[lookupTypeName];

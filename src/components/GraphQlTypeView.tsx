@@ -4,6 +4,7 @@ import styles from './GraphQlTypeView.module.css';
 
 import {
   Restructure,
+  RestructureArg,
   RestructureType,
   RestructureTypeLookup,
   Variables,
@@ -73,14 +74,29 @@ function getColumns(
               for (const fieldPathName of fieldPath) {
                 row = row?.[fieldPathName];
               }
-              if (lookupArg && row[lookupArg.name]) {
-                args[lookupArg.name] = row[lookupArg.name];
-              } else {
-                for (const arg of lookupArgs) {
-                  if (row[arg.name]) {
+              function addArg(arg: RestructureArg) {
+                const argFields = arg.typeRef.type.fields;
+                if (argFields.length > 0) {
+                  const obj: Variables = {};
+                  for (const argField of argFields) {
+                    if (argField.name in row) {
+                      obj[argField.name] = row[argField.name];
+                    }
+                  }
+                  if (Object.keys(obj)) {
+                    args[arg.name] = obj;
+                    return true;
+                  }
+                } else {
+                  if (arg.name in row) {
                     args[arg.name] = row[arg.name];
+                    return true;
                   }
                 }
+                return false;
+              }
+              if (!lookupArg || !addArg(lookupArg)) {
+                lookupArgs.forEach(addArg);
               }
               return (
                 <Link

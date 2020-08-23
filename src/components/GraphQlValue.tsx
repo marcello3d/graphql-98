@@ -2,6 +2,7 @@ import React from 'react';
 
 import styles from './GraphQlTypeView.module.css';
 
+const numberFormatter = new Intl.NumberFormat();
 export function GraphQlValue({ value }: { value: any }) {
   if (value) {
   }
@@ -21,7 +22,7 @@ export function GraphQlValue({ value }: { value: any }) {
     return <div className={styles.empty}>EMPTY</div>;
   }
   if (typeof value === 'number') {
-    return <div className={styles.number}>{value}</div>;
+    return <div className={styles.number}>{numberFormatter.format(value)}</div>;
   }
   if (typeof value === 'string') {
     if (/^\s*(http|https):\/\//.test(value)) {
