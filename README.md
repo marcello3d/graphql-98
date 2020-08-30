@@ -32,4 +32,4 @@ None of this would be possible without open source libraries to build on top of:
 
 ## Development
 
-Run with `yarn dev`
+Run with `yarn start`
