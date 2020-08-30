@@ -1,10 +1,13 @@
 import React, { useMemo } from 'react';
-import { ClientContext, GraphQLClient, useQuery } from 'graphql-hooks';
+import { ClientContext, GraphQLClient, Headers, useQuery } from 'graphql-hooks';
 
 import { getIntrospectionQuery, IntrospectionQuery } from 'graphql';
 import { IntrospectedGraphQl } from './IntrospectedGraphQl';
 import { GraphQlError } from './GraphQlError';
-import { LocalStorageCache } from '../hooks/localStorageCache';
+import {
+  LocalStorageCache,
+  useHeadersLocalStorage,
+} from '../hooks/localStorageCache';
 
 // Some graphql servers fail if you try to request the 'locations'
 // field on directives (we're not using directives anyway)
@@ -13,13 +16,27 @@ const introspectionQuery = getIntrospectionQuery({
 }).replace(`locations`, '');
 
 export function GraphQlWrapper({ url }: { url: string }) {
+  const [rawHeaders] = useHeadersLocalStorage(url);
+  const headers = useMemo(() => {
+    if (!rawHeaders) {
+      return undefined;
+    }
+    const h: Headers = {};
+    for (const { name, value } of rawHeaders) {
+      if (name && value) {
+        h[name] = value;
+      }
+    }
+    return h;
+  }, [rawHeaders]);
   const client = useMemo(
     () =>
       new GraphQLClient({
         url,
+        headers,
         cache: new LocalStorageCache(url, introspectionQuery),
       }),
-    [url],
+    [headers, url],
   );
 
   const { error, loading, data, refetch } = useQuery<IntrospectionQuery>(

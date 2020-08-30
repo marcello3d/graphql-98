@@ -10,6 +10,7 @@ import React, {
 import { StringParam, useQueryParam } from 'use-query-params';
 import { githubUrl } from './about';
 import { WhatIsThis } from './WhatIsThis';
+import { HeaderEditor } from './HeaderEditor';
 
 export function GraphQlUrlChooser() {
   const [url, setQueryUrl] = useQueryParam('url', StringParam);
@@ -75,6 +76,9 @@ export function GraphQlUrlChooser() {
               Load
             </button>
           </form>
+          {url && (
+            <HeaderEditor url={url} disabled={!!tempUrl && url !== tempUrl} />
+          )}
         </main>
       </div>
       {url ? (
