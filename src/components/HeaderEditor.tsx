@@ -1,4 +1,10 @@
-import React, { ChangeEvent, FormEvent, useCallback, useState } from 'react';
+import React, {
+  ChangeEvent,
+  FormEvent,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react';
 import {
   GraphQlHeader,
   useHeadersLocalStorage,
@@ -11,10 +17,18 @@ export function HeaderEditor({
   url: string;
   disabled?: boolean;
 }) {
-  const [headers, setHeaders] = useHeadersLocalStorage(url);
+  const [storedHeaders, setHeaders] = useHeadersLocalStorage(url);
   const [tempHeaders, setTempHeaders] = useState<GraphQlHeader[] | undefined>();
 
-  const currentHeaders = tempHeaders ?? headers ?? [{ name: '', value: '' }];
+  const currentHeaders = useMemo(
+    () => [
+      ...(tempHeaders ?? storedHeaders ?? []).filter(
+        ({ name, value }) => name || value,
+      ),
+      { name: '', value: '' },
+    ],
+    [storedHeaders, tempHeaders],
+  );
 
   const onChangeRow = useCallback(
     (index: number, name: string, value: string) => {
