@@ -16,15 +16,19 @@ type CachedSchema = {
 type CallbackData = { key: string; value: any };
 const storageCallbacks = new Set<(info?: CallbackData) => void>();
 
-function setLocalStorageData(key: string, value: any) {
-  if (value === undefined) {
-    localStorage.removeItem(key);
-  } else {
-    localStorage.setItem(key, JSON.stringify(value));
-  }
-  const callbackData = { key, value };
-  for (const callback of storageCallbacks) {
-    callback(callbackData);
+export function setLocalStorageData(key: string, value: any) {
+  try {
+    if (value === undefined) {
+      localStorage.removeItem(key);
+    } else {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+    const callbackData = { key, value };
+    for (const callback of storageCallbacks) {
+      callback(callbackData);
+    }
+  } catch (e) {
+    console.error(`Local storage write error for ${key}`, e);
   }
 }
 
@@ -150,6 +154,8 @@ export function useSchemaFetchedAt(
 
 export type GraphQlHeader = { name: string; value: string };
 
-export function useHeadersLocalStorage(url: string) {
-  return useLocalStorage<GraphQlHeader[]>(getHeadersStorageKey(url));
+export function useHeadersLocalStorage(url?: string) {
+  return useLocalStorage<GraphQlHeader[]>(
+    url ? getHeadersStorageKey(url) : undefined,
+  );
 }

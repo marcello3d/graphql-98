@@ -1,76 +1,49 @@
-import React, {
-  ChangeEvent,
-  FormEvent,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react';
-import {
-  GraphQlHeader,
-  useHeadersLocalStorage,
-} from '../hooks/localStorageCache';
+import React, { ChangeEvent, useCallback, useMemo } from 'react';
+import { GraphQlHeader } from '../hooks/localStorageCache';
 
 export function HeaderEditor({
-  url,
   disabled = false,
+  headers = [],
+  onChange,
 }: {
-  url: string;
   disabled?: boolean;
+  headers?: GraphQlHeader[];
+  onChange: (headers: GraphQlHeader[]) => void;
 }) {
-  const [storedHeaders, setHeaders] = useHeadersLocalStorage(url);
-  const [tempHeaders, setTempHeaders] = useState<GraphQlHeader[] | undefined>();
-
   const currentHeaders = useMemo(
     () => [
-      ...(tempHeaders ?? storedHeaders ?? []).filter(
-        ({ name, value }) => name || value,
-      ),
+      ...headers.filter(({ name, value }) => name || value),
       { name: '', value: '' },
     ],
-    [storedHeaders, tempHeaders],
+    [headers],
   );
 
   const onChangeRow = useCallback(
     (index: number, name: string, value: string) => {
       const newHeaders = [...currentHeaders];
       newHeaders[index] = { name, value };
-      setTempHeaders(newHeaders);
+      onChange(newHeaders);
     },
-    [currentHeaders],
-  );
-  const commit = useCallback(
-    (event?: FormEvent) => {
-      event?.preventDefault();
-      if (tempHeaders !== undefined) {
-        setHeaders(tempHeaders);
-        setTempHeaders(undefined);
-      }
-    },
-    [setHeaders, tempHeaders],
+    [currentHeaders, onChange],
   );
 
   return (
     <>
-      <div>HTTP Headers</div>
-      {currentHeaders && (
-        <form onSubmit={commit}>
-          <table>
-            <tbody>
-              {currentHeaders.map(({ name, value }, index) => (
-                <EditHeaderRow
-                  key={index}
-                  index={index}
-                  name={name}
-                  value={value}
-                  disabled={disabled}
-                  commit={commit}
-                  onChange={onChangeRow}
-                />
-              ))}
-            </tbody>
-          </table>
-        </form>
-      )}
+      <div>HTTP Headers (stored in browser local storage)</div>
+      <table>
+        <tbody>
+          {currentHeaders.map(({ name, value }, index) => (
+            <EditHeaderRow
+              key={index}
+              index={index}
+              name={name}
+              value={value}
+              disabled={disabled}
+              onChange={onChangeRow}
+            />
+          ))}
+        </tbody>
+      </table>
     </>
   );
 }
@@ -81,14 +54,12 @@ function EditHeaderRow({
   value,
   disabled,
   onChange,
-  commit,
 }: {
   index: number;
   disabled: boolean;
   name: string;
   value: string;
   onChange: (index: number, name: string, value: string) => void;
-  commit: () => void;
 }) {
   const changeHeaderName = useCallback(
     (event: ChangeEvent<HTMLInputElement>) =>
@@ -101,14 +72,6 @@ function EditHeaderRow({
 
     [index, name, onChange],
   );
-  const onKeyUp = useCallback(
-    (event: React.KeyboardEvent) => {
-      if (event.key === 'Enter') {
-        commit();
-      }
-    },
-    [commit],
-  );
 
   return (
     <tr key={index}>
@@ -119,8 +82,6 @@ function EditHeaderRow({
           data-index={index}
           placeholder="Header name"
           onChange={changeHeaderName}
-          onBlur={commit}
-          onKeyUp={onKeyUp}
           disabled={disabled}
         />
       </td>
@@ -131,8 +92,6 @@ function EditHeaderRow({
           data-index={index}
           placeholder="value"
           onChange={changeHeaderValue}
-          onBlur={commit}
-          onKeyUp={onKeyUp}
           disabled={disabled}
         />
       </td>

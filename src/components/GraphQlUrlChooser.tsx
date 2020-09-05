@@ -1,37 +1,51 @@
 import styles from './GraphQlUrlChooser.module.css';
 import { GraphQlWrapper } from './GraphQlWrapper';
-import React, {
-  ChangeEvent,
-  FormEvent,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
+import React, { ChangeEvent, FormEvent, useCallback, useState } from 'react';
 import { StringParam, useQueryParam } from 'use-query-params';
 import { githubUrl } from './about';
 import { WhatIsThis } from './WhatIsThis';
 import { HeaderEditor } from './HeaderEditor';
+import {
+  getHeadersStorageKey,
+  GraphQlHeader,
+  setLocalStorageData,
+  useHeadersLocalStorage,
+} from '../hooks/localStorageCache';
 
 export function GraphQlUrlChooser() {
   const [url, setQueryUrl] = useQueryParam('url', StringParam);
   const [, setQueryPath] = useQueryParam('path', StringParam);
-  const [tempUrl, setTempUrl] = useState(url ?? 'https://');
-  useEffect(() => {
-    if (url) {
-      setTempUrl(url);
-    }
-  }, [url, setTempUrl]);
+  const [tempChanges, setTempChanges] = useState<
+    { url: string; headers?: GraphQlHeader[] } | undefined
+  >(undefined);
+
+  const tempUrl = tempChanges?.url ?? url ?? '';
+
+  const [storedHeaders] = useHeadersLocalStorage(tempUrl || undefined);
+  const tempHeaders = tempChanges?.headers ?? storedHeaders;
 
   const onChangeUrl = useCallback(
     (event: ChangeEvent<HTMLInputElement>) =>
-      setTempUrl(event.currentTarget.value),
-    [],
+      setTempChanges({
+        url: event.currentTarget.value,
+        headers: tempHeaders,
+      }),
+    [tempHeaders],
+  );
+  const onChangeHeaders = useCallback(
+    (headers: GraphQlHeader[]) => {
+      setTempChanges({
+        url: tempUrl,
+        headers,
+      });
+    },
+    [tempUrl],
   );
 
   const goHome = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault();
-      setTempUrl('');
+      setTempChanges(undefined);
       setQueryUrl(undefined);
       setQueryPath(undefined);
     },
@@ -41,9 +55,16 @@ export function GraphQlUrlChooser() {
   const loadUrl = useCallback(
     (event: FormEvent) => {
       event.preventDefault();
-      setQueryUrl(tempUrl, 'replace');
+      if (tempChanges) {
+        setQueryUrl(tempChanges.url, 'replace');
+        setLocalStorageData(
+          getHeadersStorageKey(tempChanges.url),
+          tempChanges.headers,
+        );
+        setTempChanges(undefined);
+      }
     },
-    [tempUrl, setQueryUrl],
+    [tempChanges, setQueryUrl],
   );
 
   const goToGithub = useCallback(() => {
@@ -60,25 +81,27 @@ export function GraphQlUrlChooser() {
           </div>
         </div>
         <main className="window-body">
-          <form onSubmit={loadUrl} className={styles.urlConfig}>
-            <label htmlFor="url">Endpoint URL:</label>
-            <div className={styles.locationBox}>
-              <input
-                id="url"
-                type="text"
-                className={styles.urlInput}
-                placeholder="GraphQL endpoint"
-                value={tempUrl}
-                onChange={onChangeUrl}
-              />
+          <form onSubmit={loadUrl}>
+            <div className={styles.urlConfig}>
+              <label htmlFor="url">Endpoint URL:</label>
+              <div className={styles.locationBox}>
+                <input
+                  id="url"
+                  type="text"
+                  className={styles.urlInput}
+                  placeholder="GraphQL endpoint"
+                  value={tempUrl}
+                  onChange={onChangeUrl}
+                />
+              </div>
+              <button type="submit" disabled={!tempChanges}>
+                Load
+              </button>
             </div>
-            <button type="submit" disabled={!tempUrl || tempUrl === url}>
-              Load
-            </button>
+            {tempUrl && (
+              <HeaderEditor headers={tempHeaders} onChange={onChangeHeaders} />
+            )}
           </form>
-          {url && (
-            <HeaderEditor url={url} disabled={!!tempUrl && url !== tempUrl} />
-          )}
         </main>
       </div>
       {url ? (
