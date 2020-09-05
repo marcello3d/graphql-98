@@ -25,6 +25,9 @@ ul.tree-view,
   font-size: 14px !important;
 }
 
+input {
+  height: 2em !important;
+}
 pre {
   overflow-x: auto;
 }

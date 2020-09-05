@@ -1,18 +1,42 @@
 import { stringify } from 'query-string';
 import { Cache, CacheKeyObject } from 'graphql-hooks';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
-function getLocalStorageKey(url: string) {
+function getSchemaStorageKey(url: string) {
   return `GraphQL98.schema.v2:${stringify({ url })}`;
 }
+export function getHeadersStorageKey(url: string) {
+  return `GraphQL98.headers.v2:${stringify({ url })}`;
+}
 
-const storageCallbacks = new Set<() => void>();
+type CachedSchema = {
+  fetchedAt: string;
+  schema: any;
+};
+type CallbackData = { key: string; value: any };
+const storageCallbacks = new Set<(info?: CallbackData) => void>();
+
+export function setLocalStorageData(key: string, value: any) {
+  try {
+    if (value === undefined) {
+      localStorage.removeItem(key);
+    } else {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+    const callbackData = { key, value };
+    for (const callback of storageCallbacks) {
+      callback(callbackData);
+    }
+  } catch (e) {
+    console.error(`Local storage write error for ${key}`, e);
+  }
+}
 
 export class LocalStorageCache implements Cache {
   key: string;
   memoryCache: any;
   constructor(url: string, private readonly introspectionQuery: string) {
-    this.key = getLocalStorageKey(url);
+    this.key = getSchemaStorageKey(url);
   }
   get(keyObject: CacheKeyObject): object {
     if (keyObject.operation.query === this.introspectionQuery) {
@@ -43,16 +67,10 @@ export class LocalStorageCache implements Cache {
       }
       console.log('Caching schema');
       this.memoryCache = schema;
-      localStorage.setItem(
-        this.key,
-        JSON.stringify({
-          fetchedAt: new Date().toISOString(),
-          schema,
-        }),
-      );
-      for (const callback of storageCallbacks) {
-        callback();
-      }
+      setLocalStorageData(this.key, {
+        fetchedAt: new Date().toISOString(),
+        schema,
+      });
     }
   }
   delete(keyObject: CacheKeyObject): void {
@@ -71,27 +89,73 @@ export class LocalStorageCache implements Cache {
   }
 }
 
-export function useSchemaFetchedAt(
-  url: string | undefined | null,
-): Date | undefined {
-  const [cacheDate, setCacheDate] = useState<Date | undefined>();
+export function useLocalStorage<T>(
+  key: string | undefined,
+): [T | undefined, (newValue: T) => void, () => void] {
+  const [data, setData] = useState<T | undefined>();
   useEffect(() => {
-    if (!url) {
+    if (!key) {
       return undefined;
     }
     function setValue(value: string | null) {
-      const fetchedAt = value ? JSON.parse(value)?.fetchedAt : undefined;
-      setCacheDate(fetchedAt ? new Date(fetchedAt) : undefined);
+      setData(value ? JSON.parse(value) : undefined);
     }
 
-    const onStorage = () => {
-      setValue(localStorage.getItem(getLocalStorageKey(url)));
+    const onStorage = (info?: CallbackData) => {
+      if (info) {
+        if (info.key === key) {
+          setData(info.value);
+        }
+      } else {
+        setValue(localStorage.getItem(key));
+      }
     };
     onStorage();
     storageCallbacks.add(onStorage);
     return () => {
       storageCallbacks.delete(onStorage);
     };
-  }, [url]);
-  return cacheDate;
+  }, [key]);
+
+  const updateData = useCallback(
+    (newValue: T) => {
+      if (!key) {
+        return;
+      }
+      setData(newValue);
+      setLocalStorageData(key, newValue);
+    },
+    [key],
+  );
+
+  const clearData = useCallback(() => {
+    if (!key) {
+      return;
+    }
+    setData(undefined);
+    setLocalStorageData(key, undefined);
+  }, [key]);
+
+  return [data, updateData, clearData];
+}
+
+export function useSchemaFetchedAt(
+  url: string | undefined | null,
+): Date | undefined {
+  const [cacheData] = useLocalStorage<CachedSchema>(
+    url ? getSchemaStorageKey(url) : undefined,
+  );
+
+  return useMemo(
+    () => (cacheData ? new Date(cacheData.fetchedAt) : undefined),
+    [cacheData],
+  );
+}
+
+export type GraphQlHeader = { name: string; value: string };
+
+export function useHeadersLocalStorage(url?: string) {
+  return useLocalStorage<GraphQlHeader[]>(
+    url ? getHeadersStorageKey(url) : undefined,
+  );
 }
