@@ -24,9 +24,16 @@ ul.tree-view,
   -webkit-font-smoothing: revert !important;
   font-size: 14px !important;
 }
+.title-bar {
+  -webkit-app-region: drag;
+}
 
 pre {
   overflow-x: auto;
+}
+html,
+body {
+  background: transparent;
 }
 
 fieldset + fieldset {
