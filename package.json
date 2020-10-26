@@ -8,15 +8,12 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts ."
+    "lint": "eslint --ext .ts --ext tsx src"
   },
   "husky": {
     "hooks": {
       "pre-commit": "pretty-quick --staged"
     }
-  },
-  "eslintConfig": {
-    "extends": "react-app"
   },
   "browserslist": [
     ">0.2%",
@@ -26,7 +23,9 @@
   ],
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "name": "Graphql 98"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
@@ -37,7 +36,8 @@
         {
           "name": "@electron-forge/maker-zip",
           "platforms": [
-            "darwin"
+            "darwin",
+            "win32"
           ]
         },
         {
@@ -96,11 +96,8 @@
     "electron": "11.0.0-beta.16",
     "electron-is-dev": "1.2.0",
     "eslint": "^7.6.0",
-    "eslint-config-react-app": "6.0.0",
-    "eslint-loader": "3.0.3",
-    "eslint-plugin-import": "^2.20.0",
-    "eslint-plugin-jsx-a11y": "6.2.3",
-    "eslint-plugin-react": "7.19.0",
+    "eslint-config-prettier": "6.14.0",
+    "eslint-plugin-react": "7.21.5",
     "eslint-plugin-react-hooks": "^1.6.1",
     "file-loader": "4.3.0",
     "graphql": "15.3.0",
@@ -116,13 +113,13 @@
     "react-dev-utils": "^10.2.1",
     "react-dom": "17.0.1",
     "react-table": "7.6.0",
-    "resolve": "1.15.0",
     "semver": "6.3.0",
     "style-loader": "^1.2.1",
     "ts-loader": "^8.0.2",
     "typescript": "^4.0.2",
     "url-loader": "2.3.0",
     "use-query-params": "1.1.8",
+    "viz.js": "2.1.2",
     "ws": "7.3.1"
   },
   "babel": {

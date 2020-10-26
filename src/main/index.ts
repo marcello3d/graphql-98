@@ -24,7 +24,7 @@ const createWindow = (): void => {
   mainWindow.loadURL(APP_WEBPACK_ENTRY);
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools({ mode: 'detach' });
 };
 
 // This method will be called when Electron has finished
@@ -47,6 +47,3 @@ if (process.platform !== 'darwin') {
     }
   });
 }
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
