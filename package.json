@@ -32,7 +32,10 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "name": "Graphql 98"
+        "name": "GraphQL '98",
+        "icon": "images/icon",
+        "appCategoryType": "public.app-category.developer-tools",
+        "darwinDarkModeSupport": true
       },
       "makers": [
         {
