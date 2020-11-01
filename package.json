@@ -2,6 +2,14 @@
   "name": "graphql-98",
   "version": "0.1.0",
   "private": true,
+  "description": "A visual GraphQL data browser. Like a SQL GUI for GraphQL!",
+  "authors": [
+    {
+      "name": "Marcello Bastea-Forte",
+      "email": "marcello@cellosoft.com",
+      "url": "https://marcello.cellosoft.com/"
+    }
+  ],
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
