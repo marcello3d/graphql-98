@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    continue-on-error: true
     strategy:
       matrix:
         os: [windows-latest, macOS-latest, ubuntu-latest]
@@ -29,6 +30,6 @@ jobs:
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
       - run: yarn install --frozen-lockfile
-      - run: yarn publish
+      - run: yarn run publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
