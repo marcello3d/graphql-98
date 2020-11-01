@@ -1,6 +1,6 @@
 {
   "name": "graphql-98",
-  "version": "0.1.0-rc.3",
+  "version": "0.1.0-rc.4",
   "private": true,
   "description": "A visual GraphQL data browser. Like a SQL GUI for GraphQL!",
   "authors": [
@@ -33,7 +33,6 @@
     "forge": {
       "packagerConfig": {
         "name": "GraphQL 98",
-        "executableName": "graphql98",
         "icon": "images/icon",
         "appCategoryType": "public.app-category.developer-tools",
         "darwinDarkModeSupport": true
@@ -42,8 +41,11 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "graphql_98"
-          }
+            "name": "GraphQL 98"
+          },
+          "platforms": [
+            "win32"
+          ]
         },
         {
           "name": "@electron-forge/maker-zip",
@@ -51,14 +53,6 @@
             "darwin",
             "win32"
           ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
         }
       ],
       "plugins": [
