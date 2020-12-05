@@ -54,10 +54,6 @@
           "platforms": [
             "darwin",
             "win32"
-          ],
-          "archs": [
-            "arm64",
-            "x64"
           ]
         }
       ],
