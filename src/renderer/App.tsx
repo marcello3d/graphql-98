@@ -1,20 +1,25 @@
-import React, { Suspense } from 'react';
+import React, { CSSProperties, Suspense } from 'react';
 
 import './App.css';
 import '98.css';
 import './styles/98-vars.css';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { GraphQl98 } from './components/GraphQl98';
 import { globalHistory, Router } from '@reach/router';
 import { QueryParamProvider } from 'use-query-params';
+import { WelcomePage } from './pages/welcome';
 
+const style: CSSProperties = {
+  width: '100%',
+  height: '100%',
+  boxSizing: 'border-box',
+};
 export function App() {
   return (
-    <ErrorBoundary fallback={(error) => <div>Oh noes</div>}>
+    <ErrorBoundary fallback={(error) => <div>App Error: {error.message}</div>}>
       <Suspense fallback={<div>Hold on</div>}>
         <QueryParamProvider reachHistory={globalHistory}>
-          <Router>
-            <GraphQl98 default />
+          <Router style={style}>
+            <WelcomePage default />
           </Router>
         </QueryParamProvider>
       </Suspense>
