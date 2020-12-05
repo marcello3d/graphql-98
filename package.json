@@ -1,7 +1,7 @@
 {
   "name": "graphql-98",
   "productName": "GraphQL ‘98",
-  "version": "0.1.0-rc.5",
+  "version": "0.1.0-rc.6",
   "private": true,
   "description": "A visual GraphQL data browser. Like a SQL GUI for GraphQL!",
   "authors": [
@@ -43,7 +43,7 @@
           "name": "@electron-forge/maker-squirrel",
           "config": {
             "name": "GraphQL98",
-            "exe": "GraphQL98"
+            "exe": "GraphQL98.exe"
           },
           "platforms": [
             "win32"
@@ -54,6 +54,10 @@
           "platforms": [
             "darwin",
             "win32"
+          ],
+          "archs": [
+            "arm64",
+            "x64"
           ]
         }
       ],

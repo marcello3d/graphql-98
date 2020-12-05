@@ -76,7 +76,7 @@ export function SampleUrls() {
       {sampleUrls.map(({ name, url, infoUrl }, index) => (
         <li key={index}>
           <b>
-            <Link to={`/?${stringify({ url })}`}>
+            <Link to={`?${stringify({ url })}`}>
               <EmojiIcon emoji="📊" label="GraphQL link" />
               {name}
             </Link>

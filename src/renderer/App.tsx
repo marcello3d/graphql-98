@@ -7,6 +7,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { globalHistory, Router } from '@reach/router';
 import { QueryParamProvider } from 'use-query-params';
 import { WelcomePage } from './pages/welcome';
+import { AboutPage } from './pages/about';
 
 const style: CSSProperties = {
   width: '100%',
@@ -20,6 +21,7 @@ export function App() {
         <QueryParamProvider reachHistory={globalHistory}>
           <Router style={style}>
             <WelcomePage default />
+            <AboutPage path="/about" />
           </Router>
         </QueryParamProvider>
       </Suspense>

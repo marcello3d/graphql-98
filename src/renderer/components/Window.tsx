@@ -1,5 +1,6 @@
 import React, { ReactNode, useEffect } from 'react';
 import styles from './Window.module.css';
+import classNames from 'classnames';
 import { useWindowState } from '../hooks/useWindowState';
 
 const minimize = window.ElectronMainApi.minimize;
@@ -36,48 +37,48 @@ export function Window({
   const { maximized } = useWindowState();
 
   return (
-    <div className={styles.main}>
-      <div className="window">
-        <div
-          className="title-bar"
-          onDoubleClick={maximized ? unmaximize : maximize}
-        >
-          <div className="title-bar-text">{title}</div>
-          {(closable || minimizable || sizable || onQuestion) && (
-            <div className="title-bar-controls">
-              {minimizable && (
-                <button
-                  aria-label="Minimize"
-                  onClick={minimize}
-                  onDoubleClick={preventDefault}
-                />
-              )}
-              {sizable && (
-                <button
-                  aria-label={maximized ? 'Restore' : 'Maximize'}
-                  onClick={maximized ? unmaximize : maximize}
-                  onDoubleClick={preventDefault}
-                />
-              )}
-              {closable && (
-                <button
-                  aria-label="Close"
-                  onClick={onClose}
-                  onDoubleClick={preventDefault}
-                />
-              )}
-              {onQuestion && (
-                <button
-                  aria-label="Help"
-                  onClick={onQuestion}
-                  onDoubleClick={preventDefault}
-                />
-              )}
-            </div>
-          )}
-        </div>
-        <main className="window-body">{children}</main>
+    <div className={classNames('window', styles.main)}>
+      <div
+        className="title-bar"
+        onDoubleClick={maximized ? unmaximize : maximize}
+      >
+        <div className="title-bar-text">{title}</div>
+        {(closable || minimizable || sizable || onQuestion) && (
+          <div className="title-bar-controls">
+            {minimizable && (
+              <button
+                aria-label="Minimize"
+                onClick={minimize}
+                onDoubleClick={preventDefault}
+              />
+            )}
+            {sizable && (
+              <button
+                aria-label={maximized ? 'Restore' : 'Maximize'}
+                onClick={maximized ? unmaximize : maximize}
+                onDoubleClick={preventDefault}
+              />
+            )}
+            {closable && (
+              <button
+                aria-label="Close"
+                onClick={onClose}
+                onDoubleClick={preventDefault}
+              />
+            )}
+            {onQuestion && (
+              <button
+                aria-label="Help"
+                onClick={onQuestion}
+                onDoubleClick={preventDefault}
+              />
+            )}
+          </div>
+        )}
       </div>
+      <main className={classNames('window-body', styles.contents)}>
+        {children}
+      </main>
     </div>
   );
 }

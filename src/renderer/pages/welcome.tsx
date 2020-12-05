@@ -1,36 +1,50 @@
-import React, { useEffect } from 'react';
-import { StringParam, useQueryParam } from 'use-query-params';
+import React from 'react';
 import { RouteComponentProps } from '@reach/router';
-
-import { githubUrl } from '../components/about';
 import { Window } from '../components/Window';
+import { SampleUrls } from '../components/SampleUrls';
 
-export function WelcomePage(props: RouteComponentProps) {
-  const [url] = useQueryParam('url', StringParam);
-  const [path] = useQueryParam('path', StringParam);
-
-  const titleParts = [`GraphQL ‘98`];
-  if (url) {
-    titleParts.push(url);
-  }
-  if (path) {
-    titleParts.push(path);
-  }
-  const title = titleParts.join(' - ');
-  useEffect(() => {
-    window.document.title = title;
-  }, [title]);
-
+export function WelcomePage(_: RouteComponentProps) {
   return (
-    <Window title={title}>
-      Developed by{' '}
-      <a href="https://marcello.cellosoft.com/" target="_blank">
-        Marcello
-      </a>{' '}
-      for funsies. Source on{' '}
-      <a href={githubUrl} target="_blank">
-        Github
-      </a>
+    <Window title="Welcome to GraphQL ‘98">
+      <p>
+        GraphQL ‘98 is an open-source visual data explorer. Inspired by SQL GUIs
+        like{' '}
+        <a href="https://tableplus.com" target="_blank">
+          TablePlus
+        </a>{' '}
+        and{' '}
+        <a href="https://www.phpmyadmin.net" target="_blank">
+          phpMyAdmin
+        </a>
+        , but designed for GraphQL.
+      </p>
+      <h2>Why?</h2>
+      <p>
+        I'm in the process of learning more about GraphQL.{' '}
+        <a href="https://github.com/graphql/graphiql" target="_blank">
+          GraphiQL
+        </a>{' '}
+        and{' '}
+        <a
+          href="https://github.com/prisma-labs/graphql-playground"
+          target="_blank"
+        >
+          GraphQL Playground
+        </a>{' '}
+        are great at providing a command-line/programming interface to GraphQL.
+        But I wanted something that lets me <i>see</i> the data without typing
+        queries.
+      </p>
+
+      <h2>Quick start</h2>
+      <p>
+        Here are some public GraphQL endpoints to try courtesy of{' '}
+        <a href="https://github.com/APIs-guru/graphql-apis" target="_blank">
+          APIs-guru
+        </a>
+        :
+      </p>
+      <SampleUrls />
     </Window>
   );
 }
