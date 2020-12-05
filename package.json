@@ -1,7 +1,7 @@
 {
   "name": "graphql-98",
   "productName": "GraphQL ‘98",
-  "version": "0.1.0-rc.6",
+  "version": "0.1.0-rc.7",
   "private": true,
   "description": "A visual GraphQL data browser. Like a SQL GUI for GraphQL!",
   "authors": [
