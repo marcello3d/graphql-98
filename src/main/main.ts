@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, shell, WebContents } from 'electron';
 import fastDeepEqual from 'fast-deep-equal';
 
 declare const APP_WEBPACK_ENTRY: string;
@@ -12,11 +12,16 @@ if (require('electron-squirrel-startup')) {
 
 console.log(APP_PRELOAD_WEBPACK_ENTRY, APP_WEBPACK_ENTRY);
 
-const createWindow = (): void => {
+const createWindow = (
+  url: string = APP_WEBPACK_ENTRY,
+  parentWindow?: BrowserWindow,
+): void => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 500,
+    x: parentWindow ? parentWindow.getBounds().x + 20 : undefined,
+    y: parentWindow ? parentWindow.getBounds().y + 20 : undefined,
     resizable: true,
     maximizable: true,
     minimizable: true,
@@ -39,7 +44,7 @@ const createWindow = (): void => {
   });
 
   // and load the index.html of the app.
-  mainWindow.loadURL(APP_WEBPACK_ENTRY);
+  mainWindow.loadURL(url);
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools({ mode: 'detach' });
@@ -72,6 +77,8 @@ app.on('web-contents-created', (event, contents) => {
       event.preventDefault();
       if (url.startsWith('https://')) {
         shell.openExternal(url);
+      } else if (url.startsWith(APP_WEBPACK_ENTRY)) {
+        createWindow(url, getContentsWin(contents));
       }
     })
     .on('will-navigate', (event, navigationUrl) => {
@@ -80,8 +87,11 @@ app.on('web-contents-created', (event, contents) => {
 });
 
 function getWin(event: Electron.IpcMainInvokeEvent) {
+  return getContentsWin(event.sender);
+}
+function getContentsWin(contents: Electron.WebContents) {
   return BrowserWindow.getAllWindows().find(
-    (win) => win.webContents === event.sender,
+    (win) => win.webContents === contents,
   );
 }
 
@@ -101,7 +111,7 @@ ipcMain.handle('unmaximize', (event) => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+app.on('ready', () => createWindow());
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

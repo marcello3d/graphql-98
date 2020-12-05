@@ -6,8 +6,8 @@ import './styles/98-vars.css';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { globalHistory, Router } from '@reach/router';
 import { QueryParamProvider } from 'use-query-params';
-import { WelcomePage } from './pages/welcome';
 import { AboutPage } from './pages/about';
+import { IndexPage } from './pages';
 
 const style: CSSProperties = {
   width: '100%',
@@ -20,7 +20,7 @@ export function App() {
       <Suspense fallback={<div>Hold on</div>}>
         <QueryParamProvider reachHistory={globalHistory}>
           <Router style={style}>
-            <WelcomePage default />
+            <IndexPage default />
             <AboutPage path="/about" />
           </Router>
         </QueryParamProvider>

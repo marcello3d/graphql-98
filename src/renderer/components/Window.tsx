@@ -2,6 +2,7 @@ import React, { ReactNode, useEffect } from 'react';
 import styles from './Window.module.css';
 import classNames from 'classnames';
 import { useWindowState } from '../hooks/useWindowState';
+import Icon from '../../../images/icon.png';
 
 const minimize = window.ElectronMainApi.minimize;
 const maximize = window.ElectronMainApi.maximize;
@@ -42,7 +43,9 @@ export function Window({
         className="title-bar"
         onDoubleClick={maximized ? unmaximize : maximize}
       >
-        <div className="title-bar-text">{title}</div>
+        <div className="title-bar-text">
+          <img src={Icon} width="13" height="13" /> {title}
+        </div>
         {(closable || minimizable || sizable || onQuestion) && (
           <div className="title-bar-controls">
             {minimizable && (

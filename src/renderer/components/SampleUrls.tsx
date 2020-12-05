@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from '@reach/router';
 import { stringify } from 'query-string';
 import { EmojiIcon } from './EmojiIcon';
 
@@ -76,13 +75,16 @@ export function SampleUrls() {
       {sampleUrls.map(({ name, url, infoUrl }, index) => (
         <li key={index}>
           <b>
-            <Link to={`?${stringify({ url })}`}>
+            <a
+              href={`${location.pathname}?${stringify({ url })}`}
+              target="_blank"
+            >
               <EmojiIcon emoji="📊" label="GraphQL link" />
               {name}
-            </Link>
+            </a>
           </b>
           : {url} —{' '}
-          <a href={infoUrl}>
+          <a href={infoUrl} target="_blank">
             <EmojiIcon emoji="ℹ️" label="info" /> info
           </a>
         </li>
