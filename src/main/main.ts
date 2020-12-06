@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell, WebContents } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import fastDeepEqual from 'fast-deep-equal';
 
 declare const APP_WEBPACK_ENTRY: string;
@@ -9,8 +9,6 @@ if (require('electron-squirrel-startup')) {
   // eslint-disable-line global-require
   app.quit();
 }
-
-console.log(APP_PRELOAD_WEBPACK_ENTRY, APP_WEBPACK_ENTRY);
 
 const createWindow = (
   url: string = APP_WEBPACK_ENTRY,

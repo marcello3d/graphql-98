@@ -20,3 +20,8 @@
   flex-shrink: 1;
   overflow: auto;
 }
+
+.maximized {
+  box-shadow: none;
+  padding: 0;
+}

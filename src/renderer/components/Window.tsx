@@ -2,7 +2,7 @@ import React, { ReactNode, useEffect } from 'react';
 import styles from './Window.module.css';
 import classNames from 'classnames';
 import { useWindowState } from '../hooks/useWindowState';
-import Icon from '../../../images/icon.png';
+import Icon from '../../icon.png';
 
 const minimize = window.ElectronMainApi.minimize;
 const maximize = window.ElectronMainApi.maximize;
@@ -40,7 +40,11 @@ export function Window({
   const { maximized } = useWindowState();
 
   return (
-    <div className={classNames('window', styles.main)}>
+    <div
+      className={classNames('window', styles.main, {
+        [styles.maximized]: maximized,
+      })}
+    >
       <div
         className="title-bar"
         onDoubleClick={maximized ? unmaximize : maximize}
@@ -57,34 +61,15 @@ export function Window({
         </div>
         {(closable || minimizable || sizable || onQuestion) && (
           <div className="title-bar-controls">
-            {minimizable && (
-              <button
-                aria-label="Minimize"
-                onClick={minimize}
-                onDoubleClick={preventDefault}
-              />
-            )}
+            {minimizable && <button aria-label="Minimize" onClick={minimize} />}
             {sizable && (
               <button
                 aria-label={maximized ? 'Restore' : 'Maximize'}
                 onClick={maximized ? unmaximize : maximize}
-                onDoubleClick={preventDefault}
               />
             )}
-            {closable && (
-              <button
-                aria-label="Close"
-                onClick={close}
-                onDoubleClick={preventDefault}
-              />
-            )}
-            {onQuestion && (
-              <button
-                aria-label="Help"
-                onClick={onQuestion}
-                onDoubleClick={preventDefault}
-              />
-            )}
+            {closable && <button aria-label="Close" onClick={close} />}
+            {onQuestion && <button aria-label="Help" onClick={onQuestion} />}
           </div>
         )}
       </div>
