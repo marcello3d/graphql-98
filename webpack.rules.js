@@ -47,7 +47,8 @@ module.exports = [
     // by webpacks internal loaders.
     exclude: [/\.(js|mjs|jsx|ts|tsx|css)$/, /\.html$/, /\.json$/],
     options: {
-      name: 'static/media/[name].[hash:8].[ext]',
+      publicPath: '..',
+      name: 'media/[name].[hash:8].[ext]',
     },
   },
 ];
