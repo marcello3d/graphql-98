@@ -1,7 +1,7 @@
 {
   "name": "graphql-98",
   "productName": "GraphQL ‘98",
-  "version": "0.1.0-rc.10",
+  "version": "0.1.0-rc.11",
   "private": true,
   "description": "A visual GraphQL data browser. Like a SQL GUI for GraphQL!",
   "authors": [
@@ -14,9 +14,9 @@
   "main": "./.webpack/main",
   "scripts": {
     "start": "electron-forge start",
-    "package": "NODE_ENV=production electron-forge package",
-    "make": "NODE_ENV=production electron-forge make",
-    "publish": "NODE_ENV=production electron-forge publish",
+    "package": "cross-env NODE_ENV=production electron-forge package",
+    "make": "cross-env NODE_ENV=production electron-forge make",
+    "publish": "cross-env NODE_ENV=production electron-forge publish",
     "lint": "eslint --ext .ts --ext tsx src"
   },
   "husky": {
@@ -117,6 +117,7 @@
     "@typescript-eslint/parser": "^4.9.0",
     "camelcase": "^6.2.0",
     "classnames": "2.2.6",
+    "cross-env": "7.0.3",
     "css-loader": "^5.0.1",
     "electron": "11.0.3",
     "electron-is-dev": "1.2.0",
