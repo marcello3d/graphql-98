@@ -46,8 +46,10 @@ const createWindow = (
   // and load the index.html of the app.
   mainWindow.loadURL(url);
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools({ mode: 'detach' });
+  if (process.env.NODE_ENV === 'development') {
+    // Open the DevTools.
+    mainWindow.webContents.openDevTools({ mode: 'detach' });
+  }
   let lastWindowState: unknown;
   function updateWindowState() {
     const windowState = {

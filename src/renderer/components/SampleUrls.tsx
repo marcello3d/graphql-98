@@ -7,11 +7,12 @@ const sampleUrls: readonly {
   url: string;
   infoUrl: string;
 }[] = [
-  {
-    name: 'Artsy',
-    url: 'https://metaphysics-production.artsy.net',
-    infoUrl: 'https://github.com/artsy/metaphysics',
-  },
+  // No more introspection:
+  // {
+  //   name: 'Artsy',
+  //   url: 'https://metaphysics-production.artsy.net',
+  //   infoUrl: 'https://github.com/artsy/metaphysics',
+  // },
   {
     name: 'Countries (trevorblades.com)',
     url: 'https://countries.trevorblades.com',
@@ -22,21 +23,23 @@ const sampleUrls: readonly {
     url: 'https://countries-274616.ew.r.appspot.com/',
     infoUrl: 'https://github.com/lennertVanSever/graphcountries',
   },
-  {
-    name: 'GraphQL hub',
-    url: 'https://www.graphqlhub.com/graphql',
-    infoUrl: 'https://www.graphqlhub.com/',
-  },
+  // Seems to be down "Failed to fetch"
+  // {
+  //   name: 'GraphQL hub',
+  //   url: 'https://www.graphqlhub.com/graphql',
+  //   infoUrl: 'https://www.graphqlhub.com/',
+  // },
   {
     name: 'GraphQL jobs',
     url: 'https://api.graphql.jobs',
     infoUrl: 'https://graphql.jobs/docs/api',
   },
-  {
-    name: 'GraphQL Pokemon',
-    url: 'https://graphql-pokemon.now.sh',
-    infoUrl: 'https://github.com/lucasbento/graphql-pokemon',
-  },
+  // "Deployment not found"
+  // {
+  //   name: 'GraphQL Pokemon',
+  //   url: 'https://graphql-pokemon.now.sh',
+  //   infoUrl: 'https://github.com/lucasbento/graphql-pokemon',
+  // },
   {
     name: 'HIVDB',
     url: 'https://hivdb.stanford.edu/graphql',

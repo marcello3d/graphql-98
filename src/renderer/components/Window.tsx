@@ -12,7 +12,9 @@ const preventDefault = (event: React.MouseEvent) => {
   event.preventDefault();
 };
 
-const onClose = () => {
+const close = (event: React.MouseEvent) => {
+  event.stopPropagation();
+  event.preventDefault();
   window.close();
 };
 
@@ -44,7 +46,14 @@ export function Window({
         onDoubleClick={maximized ? unmaximize : maximize}
       >
         <div className="title-bar-text">
-          <img src={Icon} width="13" height="13" /> {title}
+          <img
+            src={Icon}
+            width="13"
+            height="13"
+            alt="GraphQL App Icon"
+            onDoubleClick={close}
+          />{' '}
+          {title}
         </div>
         {(closable || minimizable || sizable || onQuestion) && (
           <div className="title-bar-controls">
@@ -65,7 +74,7 @@ export function Window({
             {closable && (
               <button
                 aria-label="Close"
-                onClick={onClose}
+                onClick={close}
                 onDoubleClick={preventDefault}
               />
             )}

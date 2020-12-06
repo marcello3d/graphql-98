@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { APIError } from 'graphql-hooks';
 import styles from './GraphQlError.module.css';
 
@@ -11,6 +11,16 @@ export function GraphQlError({
   note?: string;
   error: APIError;
 }) {
+  const errorText = useMemo(() => {
+    let errorObject =
+      error.httpError?.body ?? error.fetchError?.toString() ?? error;
+    if (typeof errorObject === 'string') {
+      try {
+        errorObject = JSON.parse(errorObject);
+      } catch (e) {}
+    }
+    return JSON.stringify(errorObject, undefined, 2);
+  }, []);
   return (
     <fieldset>
       <legend className={styles.errorText}>
@@ -18,13 +28,7 @@ export function GraphQlError({
         {error.httpError && `: ${error.httpError.status} HTTP Error`}
         {error.fetchError && `: Network Error`}
       </legend>
-      {error.httpError ? (
-        <pre>{error.httpError.body}</pre>
-      ) : error.fetchError ? (
-        <pre>{error.fetchError.toString()}</pre>
-      ) : (
-        <pre>{JSON.stringify(error, undefined, 2)}</pre>
-      )}
+      <pre>{errorText}</pre>
       {note && <div>{note}</div>}
     </fieldset>
   );
