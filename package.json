@@ -1,7 +1,7 @@
 {
   "name": "graphql-98",
   "productName": "GraphQL ‘98",
-  "version": "0.1.0-rc.11",
+  "version": "1.0.0",
   "private": true,
   "description": "A visual GraphQL data browser. Like a SQL GUI for GraphQL!",
   "authors": [
@@ -30,68 +30,6 @@
     "not ie <= 11",
     "not op_mini all"
   ],
-  "config": {
-    "forge": {
-      "packagerConfig": {
-        "name": "GraphQL98",
-        "icon": "images/icon",
-        "appCategoryType": "public.app-category.developer-tools",
-        "asar": true,
-        "darwinDarkModeSupport": true
-      },
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "GraphQL98",
-            "exe": "GraphQL98.exe"
-          },
-          "platforms": [
-            "win32"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin",
-            "win32"
-          ]
-        }
-      ],
-      "plugins": [
-        [
-          "@electron-forge/plugin-webpack",
-          {
-            "mainConfig": "./webpack.main.config.js",
-            "renderer": {
-              "config": "./webpack.renderer.config.js",
-              "entryPoints": [
-                {
-                  "html": "./src/renderer/index.html",
-                  "js": "./src/renderer/index.tsx",
-                  "preload": {
-                    "js": "./src/preload/preload.ts"
-                  },
-                  "name": "app"
-                }
-              ]
-            }
-          }
-        ]
-      ],
-      "publishers": [
-        {
-          "name": "@electron-forge/publisher-github",
-          "config": {
-            "repository": {
-              "owner": "marcello3d",
-              "name": "graphql-98"
-            }
-          }
-        }
-      ]
-    }
-  },
   "dependencies": {
     "electron-squirrel-startup": "1.0.0",
     "fast-deep-equal": "3.1.3"

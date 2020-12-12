@@ -30,10 +30,21 @@ jobs:
             ${{ runner.OS }}-build-
             ${{ runner.OS }}-
       - run: yarn install --frozen-lockfile
-      - run: yarn run publish --arch x64
+      - name: Add macOS codesign certificate
+        if: runner.os == 'macOS'
+        run: ./config/add-macos-cert.sh
+        env:
+          MACOS_CERT_P12_BASE64: ${{ secrets.MACOS_CERT_P12_BASE64 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+      - name: Package for Windows (x64)
+        run: yarn run publish --arch x64
+        if: runner.os == 'windows'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: yarn run publish --arch arm64
+      - name: Package for macOS (x64 and arm64)
+        run: yarn run publish --arch arm64,x64
         if: runner.os == 'macOS'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
