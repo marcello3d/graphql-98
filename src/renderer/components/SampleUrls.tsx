@@ -1,6 +1,6 @@
 import React from 'react';
-import { stringify } from 'query-string';
 import { EmojiIcon } from './EmojiIcon';
+import { getGraphQlBrowserUrl } from '../pages/urls';
 
 const sampleUrls: readonly {
   name: string;
@@ -78,10 +78,7 @@ export function SampleUrls() {
       {sampleUrls.map(({ name, url, infoUrl }, index) => (
         <li key={index}>
           <b>
-            <a
-              href={`${location.pathname}?${stringify({ url })}`}
-              target="_blank"
-            >
+            <a href={getGraphQlBrowserUrl(url)} target="_blank">
               <EmojiIcon emoji="📊" label="GraphQL link" />
               {name}
             </a>

@@ -40,11 +40,13 @@ jobs:
         run: yarn run publish --arch x64
         if: runner.os == 'windows'
         env:
+          NODE_ENV: production
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Package for macOS (x64 and arm64)
         run: yarn run publish --arch arm64,x64
         if: runner.os == 'macOS'
         env:
+          NODE_ENV: production
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}

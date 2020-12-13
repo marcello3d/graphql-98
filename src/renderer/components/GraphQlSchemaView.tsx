@@ -11,6 +11,7 @@ import { GraphvizGraph } from './GraphvizGraph';
 import { computeGraph } from '../lib/schemaToGraphviz';
 import { EmojiIcon } from './EmojiIcon';
 import { formatArg, formatType } from '../lib/restructureFormatters';
+import { getGraphQlBrowserUrl } from '../pages/urls';
 
 export function GraphQlSchemaView({
   url,
@@ -58,10 +59,10 @@ function NodeItem({
 }) {
   return (
     <li>
-      <Link to={`/?${stringify({ url, path: path.join('.') })}`}>
+      <a href={getGraphQlBrowserUrl(url, path.join('.'))} target="_blank">
         {lookupArgs && <EmojiIcon emoji="🆔️" label="function" />}
         <NodeIcon field={field} /> <b>{field.name}</b>
-      </Link>
+      </a>
       {field.args.length > 0 && <>({field.args.map(formatArg).join(', ')})</>}:{' '}
       {formatType(field.typeRef)}
       {children && (
