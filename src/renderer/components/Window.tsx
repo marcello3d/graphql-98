@@ -8,10 +8,6 @@ import { version } from '../../../package.json';
 const minimize = window.ElectronMainApi.minimize;
 const maximize = window.ElectronMainApi.maximize;
 const unmaximize = window.ElectronMainApi.unmaximize;
-const preventDefault = (event: React.MouseEvent) => {
-  event.stopPropagation();
-  event.preventDefault();
-};
 
 const close = (event: React.MouseEvent) => {
   event.stopPropagation();

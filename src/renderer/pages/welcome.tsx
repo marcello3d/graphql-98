@@ -39,9 +39,7 @@ export function WelcomePage(_: RouteComponentProps) {
       </p>
 
       <h2>Open URL</h2>
-      <p>
-        <UrlChooser />
-      </p>
+      <UrlChooser />
       <h2>Quick start</h2>
       <p>
         Here are some public GraphQL endpoints to try courtesy of{' '}
