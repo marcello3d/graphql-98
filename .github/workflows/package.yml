@@ -10,7 +10,6 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
-    continue-on-error: true
     strategy:
       matrix:
         os: [windows-latest, macOS-latest]
