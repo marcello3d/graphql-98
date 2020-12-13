@@ -1,0 +1,54 @@
+:root {
+  --accent-color: #4a48ff;
+  --app-height: 100vh;
+  tab-size: 4;
+}
+:root,
+#root,
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+* {
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3 {
+  font-size: 16px !important;
+  font-weight: bold;
+}
+
+button,
+label,
+input,
+textarea,
+select,
+option,
+ul.tree-view,
+.window,
+.title-bar {
+  font-family: -apple-system, 'Roboto', 'Helvetica', 'Arial', sans-serif !important;
+  -webkit-font-smoothing: revert !important;
+  font-size: 14px !important;
+}
+.title-bar {
+  -webkit-app-region: drag;
+}
+
+pre {
+  overflow-x: auto;
+}
+html,
+body {
+  background: transparent;
+}
+
+fieldset + fieldset {
+  margin: 10px 0;
+}

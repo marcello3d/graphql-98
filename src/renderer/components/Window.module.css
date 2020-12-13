@@ -1,0 +1,33 @@
+.main {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+}
+.version {
+  font-weight: normal;
+  color: #fff;
+  padding: 0 0.5em;
+  font-size: 0.8em;
+}
+.header {
+  display: flex;
+  flex-direction: row;
+}
+.header h1 {
+  font-size: 1rem;
+}
+.contents {
+  flex-grow: 1;
+  flex-shrink: 1;
+  overflow: auto;
+}
+
+.maximized {
+  box-shadow: none;
+  padding: 0;
+}

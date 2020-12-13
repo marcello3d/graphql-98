@@ -12,7 +12,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "preserve",
+    "jsx": "react",
     "lib": [
       "dom",
       "dom.iterable",
@@ -20,6 +20,6 @@
     ]
   },
   "include": [
-    "src"
+    "src/**/*"
   ]
 }
