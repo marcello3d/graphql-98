@@ -46,8 +46,8 @@ module.exports = {
     {
       name: '@electron-forge/maker-squirrel',
       config: {
-        name: 'GraphQL98',
-        exe: 'GraphQL98.exe',
+        name: 'GraphQL 98',
+        exe: 'graphql-98.exe',
       },
       platforms: ['win32'],
     },
