@@ -46,14 +46,14 @@ module.exports = {
     {
       name: '@electron-forge/maker-squirrel',
       config: {
-        name: 'GraphQL 98',
-        exe: 'graphql-98.exe',
+        name: 'GraphQL98',
+        exe: 'GraphQL 98.exe',
       },
       platforms: ['win32'],
     },
     {
       name: '@electron-forge/maker-zip',
-      platforms: ['darwin', 'win32'],
+      platforms: ['darwin'],
     },
   ],
   plugins: [
