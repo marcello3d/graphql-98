@@ -78,9 +78,11 @@ function getColumns(
                 const argFields = arg.typeRef.type.fields;
                 if (argFields.length > 0) {
                   const obj: Variables = {};
-                  for (const argField of argFields) {
-                    if (argField.name in row) {
-                      obj[argField.name] = row[argField.name];
+                  if (row) {
+                    for (const argField of argFields) {
+                      if (argField.name in row) {
+                        obj[argField.name] = row[argField.name];
+                      }
                     }
                   }
                   if (Object.keys(obj)) {
@@ -88,7 +90,7 @@ function getColumns(
                     return true;
                   }
                 } else {
-                  if (arg.name in row) {
+                  if (row && arg.name in row) {
                     args[arg.name] = row[arg.name];
                     return true;
                   }
@@ -157,13 +159,13 @@ export function GraphQlTypeView({
       getColumns(
         url,
         firstNode.children,
-        expandColumns,
+        substructures && expandColumns,
         structure.typeQueries,
         firstNode.typeRef.type,
       ),
     [
       url,
-      expandColumns,
+      substructures && expandColumns,
       firstNode.children,
       firstNode.typeRef.type,
       structure.typeQueries,
@@ -187,6 +189,7 @@ export function GraphQlTypeView({
             type="checkbox"
             checked={expandColumns}
             onChange={setExpandColumns}
+            disabled={!substructures}
             id="expand_substructures"
           />{' '}
           <label htmlFor="expand_substructures">Expand columns</label>

@@ -7,9 +7,10 @@ import { GraphQlPage } from './graphql';
 
 export function IndexPage(_: RouteComponentProps) {
   const [url] = useQueryParam('url', StringParam);
+  const [path] = useQueryParam('path', StringParam);
 
   if (url) {
-    return <GraphQlPage key={url} url={url} />;
+    return <GraphQlPage key={url} url={url} path={path || undefined} />;
   }
   return <WelcomePage />;
 }
