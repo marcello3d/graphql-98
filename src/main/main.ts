@@ -77,8 +77,17 @@ app.on('web-contents-created', (event, contents) => {
       event.preventDefault();
       if (url.startsWith('https://')) {
         shell.openExternal(url);
-      } else if (url.startsWith(APP_WEBPACK_ENTRY)) {
-        createWindow(url, getContentsWin(contents));
+      } else {
+        if (
+          url.startsWith(APP_WEBPACK_ENTRY) ||
+          decodeURIComponent(url).startsWith(APP_WEBPACK_ENTRY)
+        ) {
+          createWindow(url, getContentsWin(contents));
+        } else {
+          console.warn(
+            `cannot handle ${url}: APP_WEBPACK_ENTRY=${APP_WEBPACK_ENTRY}`,
+          );
+        }
       }
     })
     .on('will-navigate', (event, navigationUrl) => {

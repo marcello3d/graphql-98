@@ -134,7 +134,7 @@ export function restructure(schema: IntrospectionSchema): Restructure {
       required = true;
       ref = ref.ofType;
     }
-    let array = [];
+    const array = [];
     while (ref.kind === 'LIST') {
       ref = ref.ofType;
       let listItemRequired = false;
