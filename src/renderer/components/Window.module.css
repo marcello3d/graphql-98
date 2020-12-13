@@ -8,6 +8,12 @@
   flex-grow: 1;
   flex-direction: column;
 }
+.version {
+  font-weight: normal;
+  color: #fff;
+  padding: 0 0.5em;
+  font-size: 0.8em;
+}
 .header {
   display: flex;
   flex-direction: row;

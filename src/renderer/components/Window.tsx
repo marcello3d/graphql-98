@@ -3,6 +3,7 @@ import styles from './Window.module.css';
 import classNames from 'classnames';
 import { useWindowState } from '../hooks/useWindowState';
 import Icon from '../../icon.png';
+import { version } from '../../../package.json';
 
 const minimize = window.ElectronMainApi.minimize;
 const maximize = window.ElectronMainApi.maximize;
@@ -50,17 +51,20 @@ export function Window({
         onDoubleClick={maximized ? unmaximize : maximize}
       >
         <div className="title-bar-text">
-          <img
-            src={Icon}
-            width="13"
-            height="13"
-            alt="GraphQL App Icon"
-            onDoubleClick={close}
-          />{' '}
-          {title}
+          <span>
+            <img
+              src={Icon}
+              width="13"
+              height="13"
+              alt="GraphQL App Icon"
+              onDoubleClick={close}
+            />{' '}
+            {title}
+          </span>
         </div>
         {(closable || minimizable || sizable || onQuestion) && (
           <div className="title-bar-controls">
+            <span className={styles.version}>v{version}</span>
             {minimizable && <button aria-label="Minimize" onClick={minimize} />}
             {sizable && (
               <button

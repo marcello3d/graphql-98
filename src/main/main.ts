@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import fastDeepEqual from 'fast-deep-equal';
+import updateElectronApp from 'update-electron-app';
 
 declare const APP_WEBPACK_ENTRY: string;
 declare const APP_PRELOAD_WEBPACK_ENTRY: string;
@@ -9,6 +10,8 @@ if (require('electron-squirrel-startup')) {
   // eslint-disable-line global-require
   app.quit();
 }
+
+updateElectronApp();
 
 const createWindow = (
   url: string = APP_WEBPACK_ENTRY,
