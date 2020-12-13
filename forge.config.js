@@ -23,8 +23,7 @@ module.exports = {
   packagerConfig: {
     name: 'GraphQL 98',
     executableName: 'graphql-98',
-    asar:
-      process.env.NODE_ENV !== 'development' && process.env.ASAR !== 'false',
+    asar: process.env.NODE_ENV === 'production' && process.env.ASAR !== 'false',
     icon: 'images/icon',
     appBundleId: appBundleId,
     appCategoryType: 'public.app-category.developer-tools',
