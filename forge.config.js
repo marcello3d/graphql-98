@@ -13,8 +13,8 @@ function getOsxNotarizeConfig() {
 
   return {
     appBundleId,
-    // appleId: process.env.APPLE_ID,
-    // appleIdPassword: process.env.APPLE_ID_PASSWORD,
+    appleId: process.env.APPLE_ID,
+    appleIdPassword: process.env.APPLE_ID_PASSWORD,
     ascProvider: '72679R6V8X',
   };
 }
@@ -47,7 +47,7 @@ module.exports = {
       name: '@electron-forge/maker-squirrel',
       config: {
         name: 'GraphQL98',
-        exe: 'GraphQL 98.exe',
+        exe: 'graphql-98.exe',
       },
       platforms: ['win32'],
     },
