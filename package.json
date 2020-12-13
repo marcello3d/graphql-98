@@ -1,15 +1,15 @@
 {
   "name": "graphql-98",
   "productName": "GraphQL ‘98",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "description": "A visual GraphQL data browser. Like a SQL GUI for GraphQL!",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/marcello3d/trimerge.git"
+    "url": "git+https://github.com/marcello3d/graphql-98.git"
   },
   "bugs": {
-    "url": "https://github.com/marcello3d/trimerge/issues"
+    "url": "https://github.com/marcello3d/graphql-98/issues"
   },
   "authors": [
     {
