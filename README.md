@@ -6,6 +6,8 @@ SQL GUIs like [phpMyAdmin](https://www.phpmyadmin.net) and
 
 ## [Download now!](https://github.com/marcello3d/graphql-98/releases/latest)
 
+![Screenshot of app](images/screenshot.jpg)
+
 ## Why?
 
 I'm in the process of learning more about GraphQL.
